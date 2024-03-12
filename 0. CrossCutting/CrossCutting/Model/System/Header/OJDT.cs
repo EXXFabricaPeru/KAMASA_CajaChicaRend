@@ -28,6 +28,9 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
         [SAPColumn("TransCode")]
         public string TransactionCode { get; set; }
 
+        [SAPColumn("TransId")]
+        public string TransId { get; set; }
+
         [SAPColumn("Memo")]
         public string Memo { get; set; }
 

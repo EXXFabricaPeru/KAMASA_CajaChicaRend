@@ -23,6 +23,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
         REC1 RetrieveRendicionByCode(string documentEntry);
         void ActualizarEstadoLinea(string value, string line, string estado, string docentry);
         Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion);
-        Tuple<bool, string> generarAsiento(OJDT asientoRecon);
+        Tuple<bool, string, OJDT> generarAsiento(OJDT asientoRecon);
+        Tuple<bool, OVPM> RetrievePagoByRendicion(string value);
+        OJDT RetrieveAsiento(string item2);
     }
 }

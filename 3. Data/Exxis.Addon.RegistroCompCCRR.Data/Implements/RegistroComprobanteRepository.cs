@@ -25,6 +25,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Data;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header;
+using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Detail;
 
 namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 {
@@ -43,7 +44,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 
         }
 
- 
+
 
         public override void ActualizarEstadoLinea(string code, string line, string estado, string docentry)
         {
@@ -76,7 +77,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     var codProv = childLine.GetProperty("U_EXX_RCR1_CODP").ToString();
                     var serie = childLine.GetProperty("U_EXX_RCR1_SERI").ToString();
                     var folio = childLine.GetProperty("U_EXX_RCR1_FOLI").ToString();
-                    if(codProv == list[0] && serie== list[1]&& folio == list[2])
+                    if (codProv == list[0] && serie == list[1] && folio == list[2])
                     {
                         childLine.SetProperty("U_EXX_RCR1_MIGR", estado);
                         childLine.SetProperty("U_EXX_RCR1_DOCE", docentry);
@@ -102,8 +103,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
         }
 
-        public override Tuple<bool, string> GenerarAsiento(OJDT asientoRecon)
+        public override Tuple<bool, string, OJDT> GenerarAsiento(OJDT asientoRecon)
         {
+            OJDT asiento = null;
             try
             {
 
@@ -139,19 +141,59 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     Company.GetNewObjectCode(out key);
                     if (Company.InTransaction)
                         Company.EndTransaction(BoWfTransOpt.wf_Commit);
-                    return Tuple.Create(true, key);
+
+                    asiento = RetriveAsientoByCode(key, asientoRecon);
+                    return Tuple.Create(true, key, asiento);
                 }
 
                 if (Company.InTransaction)
                     Company.EndTransaction(BoWfTransOpt.wf_RollBack);
-                return Tuple.Create(false, Company.GetLastErrorDescription());
+                return Tuple.Create(false, Company.GetLastErrorDescription(), asiento);
             }
             catch (Exception exception)
             {
                 if (Company.InTransaction)
                     Company.EndTransaction(BoWfTransOpt.wf_RollBack);
 
-                return Tuple.Create(false, exception.Message);
+                return Tuple.Create(false, exception.Message, asiento);
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
+        public OJDT RetriveAsientoByCode(string code, OJDT asiento)
+        {
+            try
+            {
+
+                //var list= TiendasList(Login);
+                OJDT refAsiento = new OJDT();
+
+                refAsiento.TransactionCode = asiento.TransactionCode;
+                refAsiento.TransId = code;
+
+                List<JDT1> lines = new List<JDT1>();
+                var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                var query = " select* from JDT1 where \"TransId\"={0} ";
+                recordSet.DoQuery(string.Format(query));
+
+                while (!recordSet.EoF)
+                {
+                    JDT1 line = new JDT1();
+                    line.AccountCode=  recordSet.GetColumnValue("Account").ToString();
+                    line.Line = recordSet.GetColumnValue("Line_ID").ToString().ToInt32();
+                    line.Debit = recordSet.GetColumnValue("Debit").ToString().ToDouble();
+                    line.Credit = recordSet.GetColumnValue("Credit").ToString().ToDouble();
+                    line.ShortName = recordSet.GetColumnValue("ShortName").ToString();
+
+                    lines.Add(line);
+                    recordSet.MoveNext();
+                }
+                refAsiento.JournalEntryLines = lines;
+
+                return refAsiento;
             }
             finally
             {
@@ -224,6 +266,40 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
         }
 
+        public override Tuple<bool, OVPM> RetrievePagoByRendicion(string rendicion)
+        {
+            try
+            {
+
+                //var list= TiendasList(Login);
+
+                var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                var query = "Select * from \"OVPM\" V" +
+                          "   where V.\"U_EXX_NUMEREND\" = '{0}' and \"Canceled\" = 'N' ";
+
+                recordSet.DoQuery(string.Format(query, rendicion));
+                OVPM pago = new OVPM()
+;                while (!recordSet.EoF)
+                {
+                    pago.TransId =  recordSet.GetColumnValue("TransId").ToString();
+                    pago.DocEntry = recordSet.GetColumnValue("DocEntry").ToString();
+                    pago.BpAct = recordSet.GetColumnValue("BpAct").ToString();
+                    pago.CardCode = recordSet.GetColumnValue("CardCode").ToString();
+                    pago.DocTotal = recordSet.GetColumnValue("DocTotal").ToString();
+                    pago.TrsfrAcct = recordSet.GetColumnValue("TrsfrAcct").ToString();
+
+                    return Tuple.Create(true,pago);
+                    recordSet.MoveNext();
+                }
+
+                return  Tuple.Create(false, pago);
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
         public override REC1 RetrieveRendicionByCode(string documentEntry)
         {
             REC1 line = new REC1();
@@ -287,6 +363,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
 
             return result;
+        }
+
+        public override OJDT RetriveAsientoByCode(object asientoRecon)
+        {
+            throw new NotImplementedException();
         }
 
 

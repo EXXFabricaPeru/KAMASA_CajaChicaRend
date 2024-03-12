@@ -33,9 +33,14 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             UnitOfWork.RegistroComprobanteRepository.ActualizarEstadoLinea(code, line, estado, docentry);
         }
 
-        public Tuple<bool, string> generarAsiento(OJDT asientoRecon)
+        public Tuple<bool, string, OJDT> generarAsiento(OJDT asientoRecon)
         {
             return UnitOfWork.RegistroComprobanteRepository.GenerarAsiento(asientoRecon);
+        }
+
+        public OJDT RetrieveAsiento(string code)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.RetriveAsientoByCode(code);
         }
 
         public Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion)
@@ -46,6 +51,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         public string RetrieveCodigoGenerado()
         {
             return UnitOfWork.RegistroComprobanteRepository.RetrieveCodigoGenerado();
+        }
+
+        public Tuple<bool, OVPM> RetrievePagoByRendicion(string rendicion)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.RetrievePagoByRendicion(rendicion);
         }
 
         public REC1 RetrieveRendicionByCode(string documentEntry)

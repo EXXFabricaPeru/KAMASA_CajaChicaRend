@@ -8,7 +8,7 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Detail
     [SystemTable("JDT1", FormType = "dummy")]
     public class JDT1
     {
-        [SAPColumn("AccountCode")]
+        [SAPColumn("Account")]
         public string AccountCode { get; set; }
 
         [SAPColumn("Line_ID")]

@@ -162,6 +162,7 @@
     <Compile Include="Model\System\Header\OITR.cs" />
     <Compile Include="Model\System\Header\OJDT.cs" />
     <Compile Include="Model\System\Header\ORCT.cs" />
+    <Compile Include="Model\System\Header\OVPM.cs" />
     <Compile Include="Model\System\Header\OWTR.cs" />
     <Compile Include="Model\System\Header\OADM.cs" />
     <Compile Include="Model\System\Header\OCRD.cs" />

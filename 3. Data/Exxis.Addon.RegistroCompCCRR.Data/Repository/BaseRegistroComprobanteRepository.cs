@@ -28,7 +28,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract void ActualizarEstadoLinea(string code, string line, string estado, string docentry);
         public abstract REC1 RetrieveRendicionByCode(string documentEntry);
         public abstract Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion);
-        public abstract Tuple<bool, string> GenerarAsiento(OJDT asientoRecon);
+        public abstract Tuple<bool, string, OJDT> GenerarAsiento(OJDT asientoRecon);
+        public abstract Tuple<bool, OVPM> RetrievePagoByRendicion(string rendicion);
+        public abstract OJDT RetriveAsientoByCode(object asientoRecon);
 
 
 
