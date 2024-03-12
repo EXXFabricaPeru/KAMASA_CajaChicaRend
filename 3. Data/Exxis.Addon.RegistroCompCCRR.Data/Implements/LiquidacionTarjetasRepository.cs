@@ -669,9 +669,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     ODLN Guias = new ODLN();
 
                     Guias.NumberAtCard = recordSet.GetColumnValue("FolioPref").ToString() + "-" + recordSet.GetColumnValue("FolioNum").ToString();
-                    Guias.Peso = recordSet.GetColumnValue("U_EXX_FE_GRPESOTOTAL").ToString();
-                    Guias.CantidadBultos = (recordSet.GetColumnValue("U_EXK_CANTBULTO") == null) ? 0 : recordSet.GetColumnValue("U_EXK_CANTBULTO").ToInt32();
-                    Guias.Programado = recordSet.GetColumnValue("U_EXK_HRPROG").ToString();
+                    //Guias.Peso = recordSet.GetColumnValue("U_EXX_FE_GRPESOTOTAL").ToString();
+                    //Guias.CantidadBultos = (recordSet.GetColumnValue("U_EXK_CANTBULTO") == null) ? 0 : recordSet.GetColumnValue("U_EXK_CANTBULTO").ToInt32();
+                    //Guias.Programado = recordSet.GetColumnValue("U_EXK_HRPROG").ToString();
                     var valAgencia = recordSet.GetColumnValue("U_EXK_AGENCOD") != null ? recordSet.GetColumnValue("U_EXK_AGENCOD").ToString() : "";
 
                     if (string.IsNullOrEmpty(valAgencia))
@@ -748,19 +748,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 int folionum = list[1].ToInt32();
                 var document = documentRepository.RetrieveDocuments(t => t.FolioPref == foliopref && t.FolioNum == folionum).FirstOrDefault();
 
-                document.Programado = estado;
-                document.FechaInicioTraslado = datosGuia.FechaInicioTraslado;
-                document.CodigoTransportista = datosGuia.CodigoTransportista;
-                document.NombreTransportista = datosGuia.NombreTransportista;
-                document.NombreConductor = datosGuia.NombreConductor;
-                document.LicenciaConductor = datosGuia.LicenciaConductor;
-                document.CantidadBultos = datosGuia.CantidadBultos;
-                document.FechaGuia = document.DocumentDeliveryDate;
-                document.TipoOperacion = datosGuia.TipoOperacion;
-                document.MotivoTraslado = datosGuia.MotivoTraslado;
-                document.FEXModalidadTraslado = datosGuia.FEXModalidadTraslado;
-                document.HojaRuta = datosGuia.HojaRuta;
-                document.EstadoEnvioSunat = datosGuia.EstadoEnvioSunat;
+                //document.Programado = estado;
+                //document.FechaInicioTraslado = datosGuia.FechaInicioTraslado;
+                //document.CodigoTransportista = datosGuia.CodigoTransportista;
+                //document.NombreTransportista = datosGuia.NombreTransportista;
+                //document.NombreConductor = datosGuia.NombreConductor;
+                //document.LicenciaConductor = datosGuia.LicenciaConductor;
+                //document.CantidadBultos = datosGuia.CantidadBultos;
+                //document.FechaGuia = document.DocumentDeliveryDate;
+                //document.TipoOperacion = datosGuia.TipoOperacion;
+                //document.MotivoTraslado = datosGuia.MotivoTraslado;
+                //document.FEXModalidadTraslado = datosGuia.FEXModalidadTraslado;
+                //document.HojaRuta = datosGuia.HojaRuta;
+                //document.EstadoEnvioSunat = datosGuia.EstadoEnvioSunat;
                 var val = documentRepository.UpdateCustomFieldsFromDocument(document);
                 //var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
                 //var query = " update ODLN where \"FolioPref\"='{0}' and \"FolioNum\"={1}";
@@ -801,7 +801,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 int folionum = list[1].ToInt32();
                 var document = documentRepository.RetrieveDocuments(t => t.FolioPref == foliopref && t.FolioNum == folionum).FirstOrDefault();
 
-                document.EstadoEnvioSunat = "Y";
+                //document.EstadoEnvioSunat = "Y";
                 //document.EstadoSUNAT = "AUT";
                 documentRepository.UpdateCustomFieldsFromDocument(document);
                 //var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
@@ -1032,15 +1032,15 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 int folionum = list[1].ToInt32();
                 var document = documentRepository.RetrieveDocuments(t => t.FolioPref == foliopref && t.FolioNum == folionum).FirstOrDefault();
 
-                if (document.EstadoSUNAT == "AUT")
-                {
-                    return Tuple.Create(true, "validado");
-                }
-                else{
-                    return Tuple.Create(false, "sin validar");
-                }
-            
+                //if (document.EstadoSUNAT == "AUT")
+                //{
+                //    return Tuple.Create(true, "validado");
+                //}
+                //else{
+                //    return Tuple.Create(false, "sin validar");
+                //}
 
+                return Tuple.Create(true, "validado");
 
             }
             catch (Exception ex)

@@ -102,7 +102,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                 try
                 {
                     document.UserFields.Fields.Item("U_EXK_MOTR").Value = entity.MotivoTrasladoSoraya;// document.MotivoTraslado;
-                    document.UserFields.Fields.Item("U_VS_MOTTRAS").Value = entity.MotivoTraslado;// document.MotivoTraslado;
+                    //document.UserFields.Fields.Item("U_VS_MOTTRAS").Value = entity.MotivoTraslado;// document.MotivoTraslado;
                     document.UserFields.Fields.Item("U_VS_PBRTOTAL").Value = entity.TotalWeight.ToString();// document.PesoBrutoTotal;
                     document.UserFields.Fields.Item("U_VS_BULPAL").Value = entity.NumeroBultosPallets.ToString();
                     document.UserFields.Fields.Item("U_VS_FECTRAS").Value = entity.DocumentDeliveryDate.ToString(); //document.FechaInicioTraslado;
@@ -115,23 +115,23 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                     {
                         document.UserFields.Fields.Item("U_VS_CODTCOND").Value = entity.TipoDocumento;// "1";// document.TipoDocumentoConductor;
                         document.UserFields.Fields.Item("U_VS_DOCCOND").Value = entity.DocumentoConductor;// document.DocumentoConductor;
-                        document.UserFields.Fields.Item("U_BPP_MDFN").Value = entity.NombreConductor;// document.NombreConductor;
-                        document.UserFields.Fields.Item("U_BPP_MDFC").Value = entity.LicenciaConductor;// document.LicenciaConductor;
-                        document.UserFields.Fields.Item("U_BPP_MDVC").Value = entity.PlacaVehiculo;// document.PlacaVehiculo;
-                        document.UserFields.Fields.Item("U_BPP_MDVN").Value = entity.MarcaVehiculo;//document.MarcaVehiculo;
+                        //document.UserFields.Fields.Item("U_BPP_MDFN").Value = entity.NombreConductor;// document.NombreConductor;
+                        //document.UserFields.Fields.Item("U_BPP_MDFC").Value = entity.LicenciaConductor;// document.LicenciaConductor;
+                        //document.UserFields.Fields.Item("U_BPP_MDVC").Value = entity.PlacaVehiculo;// document.PlacaVehiculo;
+                        //document.UserFields.Fields.Item("U_BPP_MDVN").Value = entity.MarcaVehiculo;//document.MarcaVehiculo;
                     }
                     else if (entity.ModalidadTraslado == OTRD.TransferModality.PUBLIC)
                     {
-                        document.UserFields.Fields.Item("U_BPP_MDCT").Value = entity.CodigoTransportista;//document.CodigoTransportista;
-                        document.UserFields.Fields.Item("U_BPP_MDRT").Value = entity.RucTransportista;//document.RucTransportista;
-                        document.UserFields.Fields.Item("U_BPP_MDNT").Value = entity.NombreTransportista;// document.NombreTransportista;
-                                                                                                         //if (bpTrans != null)
-                                                                                                         //{
-                                                                                                         //    userFields.Item("U_BPP_MDDT").Value = bpTrans.Addresses.Where(t => t.Code == "ALMACEN").FirstOrDefault().Street;
-                                                                                                         //}
-                                                                                                         //else
-                                                                                                         //{
-                        document.UserFields.Fields.Item("U_BPP_MDDT").Value = entity.DireccionTransportista;
+                        //document.UserFields.Fields.Item("U_BPP_MDCT").Value = entity.CodigoTransportista;//document.CodigoTransportista;
+                        //document.UserFields.Fields.Item("U_BPP_MDRT").Value = entity.RucTransportista;//document.RucTransportista;
+                        //document.UserFields.Fields.Item("U_BPP_MDNT").Value = entity.NombreTransportista;// document.NombreTransportista;
+                        //                                                                                 //if (bpTrans != null)
+                        //                                                                                 //{
+                        //                                                                                 //    userFields.Item("U_BPP_MDDT").Value = bpTrans.Addresses.Where(t => t.Code == "ALMACEN").FirstOrDefault().Street;
+                        //                                                                                 //}
+                        //                                                                                 //else
+                        //                                                                                 //{
+                        //document.UserFields.Fields.Item("U_BPP_MDDT").Value = entity.DireccionTransportista;
                         //}
 
                         document.UserFields.Fields.Item("U_VS_NROMTC").Value = entity.NroRegistroMTC;

@@ -62,6 +62,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data
 
         public BaseSAPDocumentRepository<OPDN, PDN1> GoodReceiptFromPurchaseOrderRepository => new OPDNDocumentRepository(_company);
 
+        public BaseSAPDocumentRepository<OPCH, PCH1> PurchaseInvoiceRepository => new OPCHDocumentRepository(_company);
+
         public BaseOIBTRepository BatchRepository => new OIBTRepository(_company);
 
         public BaseOPDSRepository SettingsRepository => new OPDSRepository(_company);

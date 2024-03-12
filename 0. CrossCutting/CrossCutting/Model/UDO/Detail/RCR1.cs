@@ -84,5 +84,8 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail
 
         [EnhancedColumn(20), FieldNoRelated("U_EXX_RCR1_DOCE", "Doc. Entry SAP", BoDbTypes.Alpha, Size = 20)]
         public string DocEntry { get; set; }
+
+        [EnhancedColumn(21), FieldNoRelated("U_EXX_RCR1_CDES", "Descripción", BoDbTypes.Alpha, Size = 254)]
+        public string ConceptoDescripcion { get; set; }
     }
 }

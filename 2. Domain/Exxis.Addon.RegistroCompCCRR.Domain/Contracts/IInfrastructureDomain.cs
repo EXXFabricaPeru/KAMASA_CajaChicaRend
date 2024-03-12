@@ -46,6 +46,6 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
 
         IEnumerable<Tuple<string, string>> RetrieveTipoFlujos();
 
-
+        IEnumerable<Tuple<string, string>> RetrievePaymentGroup();
     }
 }

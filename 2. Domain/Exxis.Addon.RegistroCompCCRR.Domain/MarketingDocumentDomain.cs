@@ -227,5 +227,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             return UnitOfWork.ReturnOrderRepository.RetrieveDocumentsDraft(expression);
         }
 
+        public Tuple<bool, string> RegisterPurchaseInvoice(OPCH document)
+        {
+            return UnitOfWork.PurchaseInvoiceRepository.RegisterDocument(document);
+        }
     }
 }

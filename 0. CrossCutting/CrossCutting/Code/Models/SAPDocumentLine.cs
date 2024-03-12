@@ -20,6 +20,17 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         [SAPColumn("VisOrder")]
         public int VisOrder { get; set; }
 
+     
+
+        [SAPColumn("AcctCode")]
+        public string Cuenta { get; set; }
+
+        [SAPColumn("U_EXX_SERCOMPR")]
+        public string CodServicioCompra { get; set; }
+
+        [SAPColumn("U_EXX_GRUPODET")]
+        public string GrupoDetraccion { get; set; }
+
         [SAPColumn("ItemCode")]
         public string ItemCode { get; set; }
         [SAPColumn("Dscription")]
@@ -51,8 +62,8 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         public string TaxCode { get; set; }
         [SAPColumn("WhsCode")]
         public string WarehouseCode { get; set; }
-        [SAPColumn("LineTotal")]
-        public decimal TotalAmount { get; set; }
+
+
         [SAPColumn("unitMsr")]
         public string UnitMeasure { get; set; }
 

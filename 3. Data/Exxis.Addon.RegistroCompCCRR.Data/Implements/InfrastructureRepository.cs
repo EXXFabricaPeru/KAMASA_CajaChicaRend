@@ -445,5 +445,71 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 GenericHelper.ReleaseCOMObjects();
             }
         }
+
+        public override IEnumerable<Tuple<string, string>> RetrievePaymentGroup()
+        {
+            try
+            {
+                List<Tuple<string, string>> result = new List<Tuple<string, string>>();
+
+                //var list= TiendasList(Login);
+
+                var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                var query = "Select * from \"OCTG\"  ";
+                recordSet.DoQuery(string.Format(query));
+
+                while (!recordSet.EoF)
+                {
+                    var Code = recordSet.GetColumnValue("GroupNum").ToString();
+                    var Name = recordSet.GetColumnValue("PymntGroup").ToString();
+                    result.Add(Tuple.Create(Code, Name));
+                    recordSet.MoveNext();
+                }
+
+                //    foreach (var item in list.Result)
+                //{
+                //    result.Add(Tuple.Create(item.Code, item.Name));
+                //}
+
+                return result;
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
+        public override string RetrieveAccountCodeByActID(string ActID)
+        {
+            try
+            {
+                List<Tuple<string, string>> result = new List<Tuple<string, string>>();
+
+                //var list= TiendasList(Login);
+
+                var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                var query = "Select \"AcctCode\" from \"OACT\" where \"ActId\"='{0}'  ";
+                recordSet.DoQuery(string.Format(query,ActID));
+
+                while (!recordSet.EoF)
+                {
+                    var Code = recordSet.GetColumnValue("AcctCode").ToString();
+                    //var Name = recordSet.GetColumnValue("PymntGroup").ToString();
+                    return Code;
+                    recordSet.MoveNext();
+                }
+
+                //    foreach (var item in list.Result)
+                //{
+                //    result.Add(Tuple.Create(item.Code, item.Name));
+                //}
+
+                return "";
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
     }
 }

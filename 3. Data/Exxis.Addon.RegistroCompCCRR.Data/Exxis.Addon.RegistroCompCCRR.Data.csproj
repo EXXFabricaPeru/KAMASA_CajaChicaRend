@@ -110,6 +110,7 @@
     <Compile Include="Code\SAPColumnType.cs" />
     <Compile Include="Code\SAPExtensions.cs" />
     <Compile Include="Code\ServiceLayerHelper.cs" />
+    <Compile Include="Implements\DocumentRepository\OPCHDocumentRepository.cs" />
     <Compile Include="Implements\RegistroComprobanteRepository.cs" />
     <Compile Include="Implements\LiquidacionTarjetasRepository.cs" />
     <Compile Include="Implements\VehicleRepository.cs" />

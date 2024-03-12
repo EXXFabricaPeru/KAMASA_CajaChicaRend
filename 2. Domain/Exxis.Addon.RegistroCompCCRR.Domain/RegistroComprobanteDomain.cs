@@ -13,6 +13,7 @@ using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.ServiceLayer.Detail;
 using System.Linq.Expressions;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Header;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header.Document;
+using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header;
 
 namespace Exxis.Addon.RegistroCompCCRR.Domain
 {
@@ -23,6 +24,23 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         {
 
 
+        }
+
+
+
+        public void ActualizarEstadoLinea(string code, string line, string estado, string docentry)
+        {
+            UnitOfWork.RegistroComprobanteRepository.ActualizarEstadoLinea(code, line, estado, docentry);
+        }
+
+        public Tuple<bool, string> generarAsiento(OJDT asientoRecon)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.GenerarAsiento(asientoRecon);
+        }
+
+        public Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.GenerarReconciliacion(reconcilicaion);
         }
 
         public string RetrieveCodigoGenerado()

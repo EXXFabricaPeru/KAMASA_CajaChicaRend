@@ -11,6 +11,7 @@ using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.ServiceLayer.Header;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Header;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header.Document;
+using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header;
 
 namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
 {
@@ -24,7 +25,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract string RetrieveCodigoGenerado();
         public abstract IEnumerable<Tuple<string, string>> RetrieveSucursales();
         public abstract IEnumerable<REC1> RetrieveRendicionesActivas(string tipoRendicion);
+        public abstract void ActualizarEstadoLinea(string code, string line, string estado, string docentry);
         public abstract REC1 RetrieveRendicionByCode(string documentEntry);
+        public abstract Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion);
+        public abstract Tuple<bool, string> GenerarAsiento(OJDT asientoRecon);
 
 
 

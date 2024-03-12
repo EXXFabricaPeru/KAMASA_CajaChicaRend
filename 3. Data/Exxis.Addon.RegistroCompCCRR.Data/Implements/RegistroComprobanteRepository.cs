@@ -24,6 +24,7 @@ using Sap.Data.Hana;
 using System.IO;
 using System.Diagnostics;
 using System.Data;
+using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header;
 
 namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 {
@@ -40,6 +41,161 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             //var pass = "B1Admin$$";
             //Login = serviceLayerHelper.Login(company, _company, user, pass);
 
+        }
+
+ 
+
+        public override void ActualizarEstadoLinea(string code, string line, string estado, string docentry)
+        {
+            try
+            {
+
+                //var list= TiendasList(Login);
+                var list = line.Split('-');
+
+                //var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                //var query = " UPDATE\"@EXX_RCCR_RCR1\" SET \"U_EXX_RCR1_MIGR\"='{0}', \"U_EXX_RCR1_DOCE\"='{1}'  " +
+                //    "WHERE \"Code\"='{2}' AND \"U_EXX_RCR1_CODP\"='{3}' AND \"U_EXX_RCR1_SERI\"='{4}' AND \"U_EXX_RCR1_FOLI\"='{5}' ";
+
+                //var update = string.Format(query, estado, docentry, code, list[0], list[1], list[2]);
+                //recordSet.DoQuery(update);
+
+
+                Company.StartTransaction();
+                CompanyService companyService = Company.GetCompanyService();
+                GeneralService generalService = companyService.GetGeneralService(ORCR.ID);
+                var generalDataParams = (GeneralDataParams)generalService.GetDataInterface(GeneralServiceDataInterfaces.gsGeneralDataParams);
+                generalDataParams.SetProperty("Code", code);
+                GeneralData generalData = generalService.GetByParams(generalDataParams);
+
+                GeneralDataCollection dataCollection = generalData.Child(RCR1.ID);
+
+                for (int i = 0; i < dataCollection.Count; i++)
+                {
+                    var childLine = dataCollection.Item(i);
+                    var codProv = childLine.GetProperty("U_EXX_RCR1_CODP").ToString();
+                    var serie = childLine.GetProperty("U_EXX_RCR1_SERI").ToString();
+                    var folio = childLine.GetProperty("U_EXX_RCR1_FOLI").ToString();
+                    if(codProv == list[0] && serie== list[1]&& folio == list[2])
+                    {
+                        childLine.SetProperty("U_EXX_RCR1_MIGR", estado);
+                        childLine.SetProperty("U_EXX_RCR1_DOCE", docentry);
+                    }
+
+                }
+
+                generalService.Update(generalData);
+                Company.EndTransaction(BoWfTransOpt.wf_Commit);
+            }
+            //catch (Exception exception)
+            //{
+            //    if (Company.InTransaction)
+            //        Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+
+            //    //return Tuple.Create(false, exception.Message);
+            //}
+            finally
+            {
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
+        public override Tuple<bool, string> GenerarAsiento(OJDT asientoRecon)
+        {
+            try
+            {
+
+                Company.StartTransaction();
+                var document = Company.GetBusinessObject(BoObjectTypes.oJournalEntries).To<JournalEntries>();
+
+                document.TransactionCode = asientoRecon.TransactionCode;
+                document.DueDate = asientoRecon.DueDate;
+                document.ReferenceDate = asientoRecon.ReferenceDate;
+                document.TaxDate = asientoRecon.TaxDate;
+                document.Memo = asientoRecon.Memo;
+
+                JournalEntries_Lines documentLines = document.Lines;
+                asientoRecon.JournalEntryLines.ForEach((line, index, lastIteration) =>
+                {
+                    documentLines.AccountCode = line.AccountCode;
+                    documentLines.BPLID = line.BPLID;
+                    documentLines.ShortName = line.ShortName;
+                    documentLines.Credit = line.Credit;
+                    documentLines.Debit = line.Debit;
+                    documentLines.LineMemo = line.LineMemo;
+
+
+                    lastIteration.IfFalse(() => documentLines.Add());
+                });
+
+
+
+                int operationResult = document.Add();
+                if (operationResult.IsDefault())
+                {
+                    string key;
+                    Company.GetNewObjectCode(out key);
+                    if (Company.InTransaction)
+                        Company.EndTransaction(BoWfTransOpt.wf_Commit);
+                    return Tuple.Create(true, key);
+                }
+
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+                return Tuple.Create(false, Company.GetLastErrorDescription());
+            }
+            catch (Exception exception)
+            {
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+
+                return Tuple.Create(false, exception.Message);
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
+        public override Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion)
+        {
+            try
+            {
+                Company.StartTransaction();
+                //var document = Company.GetBusinessObject(BoObjectTypes.oAccountSegmentationCategories).To<Documents>();
+                InternalReconciliationsService service = (InternalReconciliationsService)Company.GetCompanyService().GetBusinessService(ServiceTypes.InternalReconciliationsService);
+                InternalReconciliationOpenTrans openTrans = (InternalReconciliationOpenTrans)service.GetDataInterface(InternalReconciliationsServiceDataInterfaces.irsInternalReconciliationOpenTrans);
+                InternalReconciliationParams reconParams = (InternalReconciliationParams)service.GetDataInterface(InternalReconciliationsServiceDataInterfaces.irsInternalReconciliationParams);
+
+                openTrans.CardOrAccount = CardOrAccountEnum.coaCard;
+
+                openTrans.InternalReconciliationOpenTransRows.Add();
+                openTrans.InternalReconciliationOpenTransRows.Item(0).Selected = BoYesNoEnum.tYES;
+                openTrans.InternalReconciliationOpenTransRows.Item(0).TransId = 41;
+                openTrans.InternalReconciliationOpenTransRows.Item(0).TransRowId = 1;
+                openTrans.InternalReconciliationOpenTransRows.Item(0).ReconcileAmount = 10;
+                openTrans.InternalReconciliationOpenTransRows.Add();
+                openTrans.InternalReconciliationOpenTransRows.Item(1).Selected = BoYesNoEnum.tYES;
+                openTrans.InternalReconciliationOpenTransRows.Item(1).TransId = 43;
+                openTrans.InternalReconciliationOpenTransRows.Item(1).TransRowId = 0;
+                openTrans.InternalReconciliationOpenTransRows.Item(1).ReconcileAmount = 10;
+
+
+                
+                 reconParams = service.Add(openTrans);
+               
+
+
+
+
+                return Tuple.Create(false, "");
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
         }
 
         public override string RetrieveCodigoGenerado()

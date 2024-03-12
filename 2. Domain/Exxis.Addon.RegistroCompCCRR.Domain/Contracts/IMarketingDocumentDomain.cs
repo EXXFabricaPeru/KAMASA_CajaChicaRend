@@ -65,5 +65,6 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
         Tuple<bool, string> RetrieveAnexoDelivery(int referenceDocumentEntry);
 
         IEnumerable<ORDN> RetrieveDocumentsDraft(Expression<Func<ORDN, bool>> expression = null);
+        Tuple<bool, string> RegisterPurchaseInvoice(OPCH document);
     }
 }

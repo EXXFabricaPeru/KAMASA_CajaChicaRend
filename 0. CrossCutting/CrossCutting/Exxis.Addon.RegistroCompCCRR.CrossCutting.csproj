@@ -132,6 +132,7 @@
     <Compile Include="Model\System\Detail\DocumentLine\DLN1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\DPI1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\INV1.cs" />
+    <Compile Include="Model\System\Detail\DocumentLine\PCH1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\PDN1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\POR1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\PRQ1.cs" />
@@ -140,6 +141,8 @@
     <Compile Include="Model\System\Detail\DocumentLine\RIN1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\RRR1.cs" />
     <Compile Include="Model\System\Detail\DocumentLine\WTQ1.cs" />
+    <Compile Include="Model\System\Detail\ITR1.cs" />
+    <Compile Include="Model\System\Detail\JDT1.cs" />
     <Compile Include="Model\System\Detail\RDR1_.cs" />
     <Compile Include="Model\System\Detail\WTR1.cs" />
     <Compile Include="Model\System\Header\ContactPerson.cs" />
@@ -147,6 +150,7 @@
     <Compile Include="Model\System\Header\Document\ODLN.cs" />
     <Compile Include="Model\System\Header\Document\ODPI.cs" />
     <Compile Include="Model\System\Header\Document\OINV.cs" />
+    <Compile Include="Model\System\Header\Document\OPCH.cs" />
     <Compile Include="Model\System\Header\Document\OPDN.cs" />
     <Compile Include="Model\System\Header\Document\OPOR.cs" />
     <Compile Include="Model\System\Header\Document\OPRQ.cs" />
@@ -155,6 +159,8 @@
     <Compile Include="Model\System\Header\Document\ORIN.cs" />
     <Compile Include="Model\System\Header\OACT.cs" />
     <Compile Include="Model\System\Header\OCST.cs" />
+    <Compile Include="Model\System\Header\OITR.cs" />
+    <Compile Include="Model\System\Header\OJDT.cs" />
     <Compile Include="Model\System\Header\ORCT.cs" />
     <Compile Include="Model\System\Header\OWTR.cs" />
     <Compile Include="Model\System\Header\OADM.cs" />

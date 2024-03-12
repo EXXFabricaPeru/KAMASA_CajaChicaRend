@@ -63,5 +63,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
 
         public abstract Tuple<int, int> RetrievePaymentGroupNumDetail(int code);
         public abstract IEnumerable<Tuple<string, string>> RetrieveTipoFlujos();
+        public abstract IEnumerable<Tuple<string, string>> RetrievePaymentGroup();
+        public abstract string RetrieveAccountCodeByActID(string ActID);
     }
 }

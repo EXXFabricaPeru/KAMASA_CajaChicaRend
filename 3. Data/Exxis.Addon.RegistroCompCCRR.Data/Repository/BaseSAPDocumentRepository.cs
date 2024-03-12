@@ -1483,8 +1483,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
                 sapDocument.Quantity = recordSet.GetColumnValue("Quantity").ToDecimal();
                 //sapDocument.UsefulLifeTime = recordSet.GetColumnValue("U_EXK_TVUM")?.ToInt32() ?? 0;
                 sapDocument.UnitPrice = recordSet.GetColumnValue("Price").ToDecimal();
-                sapDocument.TotalAmount = recordSet.GetColumnValue("LineTotal").ToDecimal();
-                sapDocument.TotalPrice = recordSet.GetColumnValue("GTotal").ToDecimal();
+                sapDocument.TotalPrice = recordSet.GetColumnValue("LineTotal").ToDecimal();
+                //sapDocument.TotalPrice = recordSet.GetColumnValue("GTotal").ToDecimal();
                 sapDocument.TotalSaleVolume = recordSet.GetColumnValue("Volume").ToDecimal();
                 sapDocument.TotalSaleWeight = recordSet.GetColumnValue("Weight1").ToDecimal();
                 sapDocument.TaxCode = recordSet.GetStringValue("TaxCode");
@@ -1557,8 +1557,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
                 sapDocument.Quantity = recordSet.GetColumnValue("Quantity").ToDecimal();
                 //sapDocument.UsefulLifeTime = recordSet.GetColumnValue("U_EXK_TVUM")?.ToInt32() ?? 0;
                 sapDocument.UnitPrice = recordSet.GetColumnValue("Price").ToDecimal();
-                sapDocument.TotalAmount = recordSet.GetColumnValue("LineTotal").ToDecimal();
-                sapDocument.TotalPrice = recordSet.GetColumnValue("GTotal").ToDecimal();
+                sapDocument.TotalPrice = recordSet.GetColumnValue("LineTotal").ToDecimal();
+                //sapDocument.TotalPrice = recordSet.GetColumnValue("GTotal").ToDecimal();
                 sapDocument.TotalSaleVolume = recordSet.GetColumnValue("Volume").ToDecimal();
                 sapDocument.TotalSaleWeight = recordSet.GetColumnValue("Weight1").ToDecimal();
                 sapDocument.TaxCode = recordSet.GetStringValue("TaxCode");

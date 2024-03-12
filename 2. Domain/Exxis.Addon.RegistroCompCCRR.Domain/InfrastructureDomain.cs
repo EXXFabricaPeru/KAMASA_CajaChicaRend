@@ -230,5 +230,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         {
             return UnitOfWork.InfrastructureRepository.RetrieveTipoFlujos();
         }
+
+        public IEnumerable<Tuple<string, string>> RetrievePaymentGroup()
+        {
+            return UnitOfWork.InfrastructureRepository.RetrievePaymentGroup();
+        }
     }
 }
