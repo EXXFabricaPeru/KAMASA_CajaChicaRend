@@ -73,6 +73,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             return UnitOfWork.RegistroComprobanteRepository.RetrieveSucursales();
         }
 
+        public void ActualizarEstadoRegistroRendicion(string code, string estado)
+        {
+            UnitOfWork.RegistroComprobanteRepository.ActualizarEstadoRegistroRendicion(code, estado);
+        }
+
 
 
 

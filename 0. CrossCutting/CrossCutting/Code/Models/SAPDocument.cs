@@ -97,6 +97,9 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         [SAPColumn("DocType")]
         public string Type { get; set; }
 
+        [SAPColumn("TransId")]
+        public int TransId { get; set; }
+
         public bool isFR { get; set; }
 
         public int CompareTo(object obj)
@@ -169,6 +172,8 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         public int ReferencedDocEntryGuia { get; set; }
 
         public int NroSapCobro { get; set; }
+
+
         public int NroSapCobroTransId { get; set; }
 
         private class SortDistributionPriority : IComparer<string>

@@ -231,5 +231,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         {
             return UnitOfWork.PurchaseInvoiceRepository.RegisterDocument(document);
         }
+
+        public IEnumerable<OPCH> RetrievePurchaseInvoice(Expression<Func<OPCH, bool>> expression)
+        {
+            return UnitOfWork.PurchaseInvoiceRepository.RetrieveDocuments(expression);
+        }
+
+
     }
 }

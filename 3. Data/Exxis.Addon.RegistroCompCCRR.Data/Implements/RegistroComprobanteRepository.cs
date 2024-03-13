@@ -176,8 +176,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 
                 List<JDT1> lines = new List<JDT1>();
                 var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
-                var query = " select* from JDT1 where \"TransId\"={0} ";
-                recordSet.DoQuery(string.Format(query));
+                var query = " select * from JDT1 where \"TransId\"={0} ";
+                recordSet.DoQuery(string.Format(query,code));
 
                 while (!recordSet.EoF)
                 {
@@ -187,6 +187,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     line.Debit = recordSet.GetColumnValue("Debit").ToString().ToDouble();
                     line.Credit = recordSet.GetColumnValue("Credit").ToString().ToDouble();
                     line.ShortName = recordSet.GetColumnValue("ShortName").ToString();
+                    line.LineMemo = recordSet.GetColumnValue("LineMemo").ToString();
 
                     lines.Add(line);
                     recordSet.MoveNext();
@@ -201,7 +202,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
         }
 
-        public override Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion)
+        public override Tuple<bool, string> GenerarReconciliacion(OITR reconciliacion)
         {
             try
             {
@@ -211,24 +212,36 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 InternalReconciliationOpenTrans openTrans = (InternalReconciliationOpenTrans)service.GetDataInterface(InternalReconciliationsServiceDataInterfaces.irsInternalReconciliationOpenTrans);
                 InternalReconciliationParams reconParams = (InternalReconciliationParams)service.GetDataInterface(InternalReconciliationsServiceDataInterfaces.irsInternalReconciliationParams);
 
-                openTrans.CardOrAccount = CardOrAccountEnum.coaCard;
+                openTrans.CardOrAccount = reconciliacion.CardOrAccount=="C"? CardOrAccountEnum.coaCard:CardOrAccountEnum.coaAccount;
+                openTrans.ReconDate = reconciliacion.ReconDate;
 
-                openTrans.InternalReconciliationOpenTransRows.Add();
-                openTrans.InternalReconciliationOpenTransRows.Item(0).Selected = BoYesNoEnum.tYES;
-                openTrans.InternalReconciliationOpenTransRows.Item(0).TransId = 41;
-                openTrans.InternalReconciliationOpenTransRows.Item(0).TransRowId = 1;
-                openTrans.InternalReconciliationOpenTransRows.Item(0).ReconcileAmount = 10;
-                openTrans.InternalReconciliationOpenTransRows.Add();
-                openTrans.InternalReconciliationOpenTransRows.Item(1).Selected = BoYesNoEnum.tYES;
-                openTrans.InternalReconciliationOpenTransRows.Item(1).TransId = 43;
-                openTrans.InternalReconciliationOpenTransRows.Item(1).TransRowId = 0;
-                openTrans.InternalReconciliationOpenTransRows.Item(1).ReconcileAmount = 10;
+                int cont = 0;
+                foreach (var item in reconciliacion.InternalReconciliationOpenTransRows)
+                {
+                    openTrans.InternalReconciliationOpenTransRows.Add();
+                    openTrans.InternalReconciliationOpenTransRows.Item(cont).Selected = BoYesNoEnum.tYES;
+                    openTrans.InternalReconciliationOpenTransRows.Item(cont).TransId = item.TransId.ToInt32();
+                    openTrans.InternalReconciliationOpenTransRows.Item(cont).TransRowId = item.TransRowId.ToInt32();
+                    openTrans.InternalReconciliationOpenTransRows.Item(cont).ReconcileAmount = item.ReconcileAmount.ToDouble();
+                    cont++;
+                }
+                //openTrans.InternalReconciliationOpenTransRows.Add();
+                //openTrans.InternalReconciliationOpenTransRows.Item(0).Selected = BoYesNoEnum.tYES;
+                //openTrans.InternalReconciliationOpenTransRows.Item(0).TransId = 41;
+                //openTrans.InternalReconciliationOpenTransRows.Item(0).TransRowId = 1;
+                //openTrans.InternalReconciliationOpenTransRows.Item(0).ReconcileAmount = 10;
+                //openTrans.InternalReconciliationOpenTransRows.Add();
+                //openTrans.InternalReconciliationOpenTransRows.Item(1).Selected = BoYesNoEnum.tYES;
+                //openTrans.InternalReconciliationOpenTransRows.Item(1).TransId = 43;
+                //openTrans.InternalReconciliationOpenTransRows.Item(1).TransRowId = 0;
+                //openTrans.InternalReconciliationOpenTransRows.Item(1).ReconcileAmount = 10;
 
 
                 
                  reconParams = service.Add(openTrans);
-               
 
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_Commit);
 
 
 
@@ -237,6 +250,32 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             finally
             {
                 GenericHelper.ReleaseCOMObjects();
+            }
+        }
+        public override void ActualizarEstadoRegistroRendicion(string codigo, string estado)
+        {
+            try
+            {
+                Company.StartTransaction();
+                CompanyService companyService = Company.GetCompanyService();
+                GeneralService generalService = companyService.GetGeneralService(ORCR.ID);
+                var generalDataParams = (GeneralDataParams)generalService.GetDataInterface(GeneralServiceDataInterfaces.gsGeneralDataParams);
+                generalDataParams.SetProperty("Code", codigo);
+                GeneralData generalData = generalService.GetByParams(generalDataParams);
+
+                generalData.SetProperty("U_EXX_ORCR_STAD", estado);
+
+
+                generalService.Update(generalData);
+                Company.EndTransaction(BoWfTransOpt.wf_Commit);
+                //return Tuple.Create(true, string.Empty);
+            }
+            catch (Exception exception)
+            {
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+
+                //return Tuple.Create(false, exception.Message);
             }
         }
 
@@ -287,6 +326,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     pago.CardCode = recordSet.GetColumnValue("CardCode").ToString();
                     pago.DocTotal = recordSet.GetColumnValue("DocTotal").ToString();
                     pago.TrsfrAcct = recordSet.GetColumnValue("TrsfrAcct").ToString();
+
 
                     return Tuple.Create(true,pago);
                     recordSet.MoveNext();

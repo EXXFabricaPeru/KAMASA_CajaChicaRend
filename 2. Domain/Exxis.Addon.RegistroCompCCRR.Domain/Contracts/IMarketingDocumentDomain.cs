@@ -43,6 +43,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
 
         IEnumerable<OQUT> RetrieveQuotation(Expression<Func<OQUT, bool>> expression);
 
+        IEnumerable<OPCH> RetrievePurchaseInvoice(Expression<Func<OPCH, bool>> expression);
+
         Tuple<bool, string> CancelDocumentDelivery(int entry);
 
         Tuple<bool, string> CancelDocumentInvoice(int entry);
@@ -66,5 +68,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
 
         IEnumerable<ORDN> RetrieveDocumentsDraft(Expression<Func<ORDN, bool>> expression = null);
         Tuple<bool, string> RegisterPurchaseInvoice(OPCH document);
+
+      
     }
 }

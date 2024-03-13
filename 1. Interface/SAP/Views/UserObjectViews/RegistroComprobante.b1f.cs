@@ -64,6 +64,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._saldoEditText = ((SAPbouiCOM.EditText)(this.GetItem("19_U_E").Specific));
             this._searchRendicionButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._searchRendicionButton_ClickAfter);
             this._crearButton = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
+            this._estadoCombox = ((SAPbouiCOM.ComboBox)(this.GetItem("21_U_Cb").Specific));
+            
             this.OnCustomInitialize();
 
         }
@@ -283,6 +285,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
         RCR1 lineGrilla = new RCR1();
         private Button _crearButton;
+        private ComboBox _estadoCombox;
 
         private void _detailMatrix_ChooseFromListBefore(object sboObject, SBOItemEventArg eventArgs, out bool BubbleEvent)
         {
@@ -709,6 +712,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
+                if (_estadoCombox.Selected.Value == "L")
+                    throw new Exception("No se puede liquidar un registro ya liquidado");
+
                 if (UIAPIRawForm.IsAddMode())
                     throw new Exception("Primero debe crear el registro");
 
@@ -734,6 +740,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 ApplicationInterfaceHelper.ShowDialogMessageBox(DocFalta + " ¿Está seguro de liquidar la rendición/caja chica?, Luego de Liquidar no podrá revertir los cambios por el addon",
                    () =>
                    {
+
                        _liquidarRendicion();
                    },
                    null);
@@ -748,6 +755,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
 
         }
+        
 
         private void _liquidarRendicion()
         {
@@ -761,6 +769,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 if (asientoReconciliacion != null)
                 {
                     var recon= generarReconciliacionData(asientoReconciliacion);
+                    if (recon)
+                    {
+                        _estadoCombox.SelectByValue("L");
+                        _registroComprobanteDomain.ActualizarEstadoRegistroRendicion(_codeEditText.Value, "L");
+                        ApplicationInterfaceHelper.ShowSuccessStatusBarMessage("Liquidación Completa");
+                        UIAPIRawForm.Refresh();
+                    }
                 }
 
                
@@ -787,7 +802,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     if (estado == "Si")
                     {
                         var total = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(i).Specific).Value;
-                        var numeracion = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(i).Specific).Value+"-" +  ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(i).Specific).Value;
+                        var serie = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(i).Specific).Value;
+                        var numero =((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(i).Specific).Value.ToInt32();
+                        var numeracion = serie + "-" + numero;
                         var proveedor = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(i).Specific).Value;
 
                         OITR recon = new OITR();
@@ -795,9 +812,17 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                         recon.ReconDate = DateTime.Now;
                         recon.CardOrAccount = "C";
-
+                        var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t=>t.FolioPref==serie&&t.FolioNum==numero && t.CardCode==proveedor).FirstOrDefault();
                         //COMPROBANTE
                         ITR1 doc = new ITR1();
+                        //doc.CreditOrDebit = "codDebit";
+                        doc.ReconcileAmount = total;
+                        //doc.ShortName = item.CardCode;
+                        doc.Selected = "Y";
+                        //doc.SrcObjAbs = int.Parse(item.DocEntry);
+                        //doc.SrcObjTyp = "13";
+                        doc.TransId = purchaseInvoice.TransId.ToString();
+                        doc.TransRowId = "0";
 
                         recon.InternalReconciliationOpenTransRows.Add(doc);
                         //Asiento
@@ -809,21 +834,49 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         //jdt.SrcObjAbs = int.Parse(item.DocEntry);
                         //jdt.SrcObjTyp = "13";
                         jdt.TransId = asientoReconciliacion.TransId;
-                        jdt.TransRowId = asientoReconciliacion.JournalEntryLines.Where(t=>t.LineMemo=="").FirstOrDefault().LineMemo;
+                        jdt.TransRowId = asientoReconciliacion.JournalEntryLines.Where(t=>t.LineMemo==numeracion && t.ShortName==proveedor).FirstOrDefault().Line.ToString();
 
                         recon.InternalReconciliationOpenTransRows.Add(jdt);
-                        //var respuesta = _registroComprobanteDomain.GenerarReconciliacion(reconcilicaion);
+
+                        var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
                     }
 
                 }
 
+                //Liquidar Pago a Cuenta;
+                var pago = _registroComprobanteDomain.RetrievePagoByRendicion(_nroRendicionEditText.Value);
+                OITR reconPago = new OITR();
+                reconPago.InternalReconciliationOpenTransRows = new List<ITR1>();
+
+                reconPago.ReconDate = DateTime.Now;
+                reconPago.CardOrAccount = "C";
+                //COMPROBANTE
+                ITR1 doc1 = new ITR1();
+                doc1.ReconcileAmount = pago.Item2.DocTotal;
+                doc1.Selected = "Y";
+                doc1.TransId = pago.Item2.TransId;
+                doc1.TransRowId = "1";
+
+                reconPago.InternalReconciliationOpenTransRows.Add(doc1);
+                //Asiento
+                ITR1 doc2 = new ITR1();
+                //jdt.CreditOrDebit = "codDebit";
+                doc2.ReconcileAmount = pago.Item2.DocTotal;
+                //jdt.ShortName = item.CardCode;
+                doc2.Selected = "Y";
+                doc2.TransId = asientoReconciliacion.TransId;
+                doc2.TransRowId = "0";
+
+                reconPago.InternalReconciliationOpenTransRows.Add(doc2);
+
+                var resp = _registroComprobanteDomain.GenerarReconciliacion(reconPago);
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                return false;
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);        
+            return false;
             }
         }
 
@@ -888,8 +941,15 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 extorno.LineMemo = "Extorno Reconciliación";
                 lines.Add(extorno);
             }
-            else if (totalCredit > totalDebit)
+            else if (totalCredit < totalDebit)
             {
+                JDT1 extorno = new JDT1();
+                extorno.ShortName = pago.Item2.TrsfrAcct; //"E00045853455";
+                extorno.AccountCode = pago.Item2.TrsfrAcct;//"_SYS00000001366";
+                extorno.Credit = totalDebit - totalCredit;//_montoEditText.Value.ToDouble();
+                extorno.BPLID = _sucursalComboBox.Value.ToInt32();
+                extorno.LineMemo = "Ajuste Reconciliación";
+                lines.Add(extorno);
 
             }
 

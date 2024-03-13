@@ -31,6 +31,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract Tuple<bool, string, OJDT> GenerarAsiento(OJDT asientoRecon);
         public abstract Tuple<bool, OVPM> RetrievePagoByRendicion(string rendicion);
         public abstract OJDT RetriveAsientoByCode(object asientoRecon);
+        public abstract void ActualizarEstadoRegistroRendicion(string code, string estado);
 
 
 
