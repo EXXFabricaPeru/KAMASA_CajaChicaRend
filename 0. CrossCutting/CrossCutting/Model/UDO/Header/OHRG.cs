@@ -1,14 +1,10 @@
-﻿// ReSharper disable InconsistentNaming
-// ReSharper disable IdentifierTypo
-// ReSharper disable ExplicitCallerInfoArgument
-using System;
+﻿using System;
 using System.Collections.Generic;
 using DisposableSAPBO.RuntimeMapper.Attributes;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail;
 using VersionDLL.FlagElements.Attributes;
 using VersionDLL.FlagElements.FieldsEnums;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Code;
-using Exxis.Addon.RegistroCompCCRR.CrossCutting.Constant;
 
 namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Header
 {

@@ -14,8 +14,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions
 
         protected override void InitializeTables()
         {
-            
-            //CreateObject(typeof(ORCR));
+
+            CreateObject(typeof(ORCR));
         }
     }
 }

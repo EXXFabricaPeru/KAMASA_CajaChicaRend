@@ -9,7 +9,7 @@ using Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions;
 using Exxis.Addon.RegistroCompCCRR.Interface.Utilities;
 using VersionDLL;
 using System.Threading.Tasks;
-using Exxis.Addon.RegistroCompCCRR.Interface.Licencia;
+
 
 namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
 {

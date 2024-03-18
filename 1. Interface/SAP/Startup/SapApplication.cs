@@ -5,7 +5,6 @@ using System.Diagnostics;
 //using SAPbobsCOM;
 //using SAPbouiCOM;
 using System.Threading.Tasks;
-using Exxis.Addon.RegistroCompCCRR.Interface.Licencia;
 using B1SLayer;
 namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
 {
