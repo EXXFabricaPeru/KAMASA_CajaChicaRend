@@ -351,10 +351,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             while (!recordSet.EoF)
             {
                 
-                line.CodigoRendicion = recordSet.GetColumnValue("U_EXX_CODIGO").ToString();
-                line.NroDocEmpleado = recordSet.GetColumnValue("U_EXX_NRODOE").ToString();
-                line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION").ToString();
-                line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP").ToString();
+                line.CodigoRendicion = recordSet.GetColumnValue("U_EXX_CODIGO")?.ToString();
+                line.NroDocEmpleado = recordSet.GetColumnValue("U_EXX_NRODOE")?.ToString();
+                line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION")?.ToString();
+                line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP")?.ToString();
                 line.Monto = recordSet.GetColumnValue("U_EXX_MONCAJ").ToDouble();
 
                 recordSet.MoveNext();
@@ -376,9 +376,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             {
                 REC1 line = new REC1();
                 line.CodigoRendicion = recordSet.GetColumnValue("U_EXX_CODIGO").ToString();
-                line.NroDocEmpleado = recordSet.GetColumnValue("U_EXX_NRODOE").ToString();
-                line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION").ToString();
-                line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP").ToString();
+                line.NroDocEmpleado = recordSet.GetColumnValue("U_EXX_NRODOE")?.ToString();
+                line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION")?.ToString();
+                line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP")?.ToString();
                 line.Monto = recordSet.GetColumnValue("U_EXX_MONCAJ").ToDouble();
                 line.FechaInicio = recordSet.GetColumnValue("U_EXX_FINICIO").ToDateTime();
                 line.FechaFin = recordSet.GetColumnValue("U_EXX_FFIN").ToDateTime();

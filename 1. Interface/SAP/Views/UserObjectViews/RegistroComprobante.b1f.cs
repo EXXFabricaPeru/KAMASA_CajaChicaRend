@@ -428,6 +428,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
 
             _detailMatrix.FlushToDataSource();
+            if (!string.IsNullOrEmpty(_ColSelect))
+            {
+                //var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+                //codpre.Item.Click();
+                //_ColSelect = "";
+            }
 
         }
 
@@ -454,12 +460,17 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
         }
 
+        string _ColSelect = "";
+        int _rowSelect = -1;
         private void _detailMatrix_ChooseFromListAfter(object sboObject, SBOItemEventArg eventArgs)
         {
             try
             {
+                _ColSelect = "";
+                _rowSelect = -1;
                 if (eventArgs.ColUID == ColumnaCodigoProveedor)
                 {
+                    _ColSelect = ColumnaCodigoProveedor;
                     SAPbouiCOM.DataTable selectedObjects = eventArgs.To<SAPbouiCOM.ISBOChooseFromListEventArg>().SelectedObjects;
                     if (selectedObjects == null)
                         return;
@@ -468,10 +479,14 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
 
                     var _item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNombreProveedor).Cells.Item(eventArgs.Row).Specific;
-                    _item.Value = nameProveedor;
+                    _item.Value = nameProveedor; 
+
                     _detailMatrix.FlushToDataSource();
                     _detailMatrix.AutoResizeColumns();
+                    
+
                     GenericHelper.ReleaseCOMObjects(selectedObjects);
+                    _rowSelect = eventArgs.Row;
 
                 }
                 else if (eventArgs.ColUID == ColumnaCodigoGasto)
