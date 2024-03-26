@@ -49,6 +49,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
 
         Tuple<bool, string> CancelDocumentInvoice(int entry);
 
+        Tuple<bool, string> CancelDocumentPurchaseInvoice(int entry);
+
+
         IEnumerable<ODLN> GetDocumentDelivery(string item2);
 
         OINV RetrieveInvoiceByCode(int entry);

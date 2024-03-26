@@ -78,6 +78,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             UnitOfWork.RegistroComprobanteRepository.ActualizarEstadoRegistroRendicion(code, estado);
         }
 
+        public Tuple<bool, string, string> RetrieveGastoByCode(string codServicioCompra)
+        {
+           return UnitOfWork.RegistroComprobanteRepository.RetrieveGastoByCode(codServicioCompra);
+        }
+
 
 
 

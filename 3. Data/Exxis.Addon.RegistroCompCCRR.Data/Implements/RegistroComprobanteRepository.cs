@@ -410,6 +410,33 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             throw new NotImplementedException();
         }
 
+        public override Tuple<bool, string, string> RetrieveGastoByCode(string codServicioCompra)
+        {
+            try
+            {
+
+                //var list= TiendasList(Login);
+
+                var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
+                var query = " select  GD.\"Code\",GD.\"U_EXX_MONMIN\"  from \"@EXX_SERCOM\" S JOIN \"@EXX_GRUDET\" GD ON GD.\"Code\"=S.\"U_EXX_GRUDET\" where S.\"Code\"='{0}' ";
+                recordSet.DoQuery(string.Format(query,codServicioCompra));
+
+                while (!recordSet.EoF)
+                {
+                    var grupoDet = recordSet.GetColumnValue("Code").ToString();
+                    var montoMinimo = recordSet.GetColumnValue("U_EXX_MONMIN").ToString();
+                    return Tuple.Create(true, grupoDet, montoMinimo);
+                    recordSet.MoveNext();
+                }
+
+                return Tuple.Create(false, "No se encontró registro del servicio", "");
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
 
         //public override IEnumerable<Tuple<string, string>> RetrieveTiendasData()
         //{

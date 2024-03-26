@@ -196,15 +196,29 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Customizations
                 RegistroComprobante.Instance.ClearFormToAddMode();
             }
 
-            else if (menuEvent.MenuUID == "VS_PD_OARD_Remove_Line" && menuEvent.BeforeAction == true)
+            else if (menuEvent.MenuUID == "EXX_RCCR_ORCR_Remove_Line" && menuEvent.BeforeAction == true)
             {
-                ApplicationInterfaceHelper.ShowStatusBarMessage("No se puede eliminar líneas a la ruta", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
-                handle = false;
+                if (LocalStorage.FRM_REG_COM.validarLineaAEliminar())
+                {
+                    LocalStorage.FRM_REG_COM.ActualizarSaldo();
+                    handle = true;
+                }
+                else
+                {
+                    handle = false;
+                }
+                LocalStorage.FRM_REG_COM.ActualizarSaldo();
+                //ApplicationInterfaceHelper.ShowStatusBarMessage("No se puede eliminar líneas", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
+                //handle = false;
             }
             else if (menuEvent.MenuUID == "VS_PD_OARD_Add_Line" && menuEvent.BeforeAction == true)
             {
                 ApplicationInterfaceHelper.ShowStatusBarMessage("No se puede añadir líneas a la ruta", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
                 handle = false;
+            }
+            else if (menuEvent.MenuUID == RegistroComprobante.ANULAR_DOCUMENTO && menuEvent.BeforeAction == false)
+            {
+                LocalStorage.FRM_REG_COM.AnularDocumento();
             }
 
         }

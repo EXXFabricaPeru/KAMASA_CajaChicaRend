@@ -40,5 +40,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Utilities
         //public static RouteForm FORM_ROUTE_UDO { get; set; }
 
         //public static RouteFormModal MODAL_ROUTE_UDO { get; set; }
+
+        public static RegistroComprobante FRM_REG_COM { get; set; }
+       
     }
 }

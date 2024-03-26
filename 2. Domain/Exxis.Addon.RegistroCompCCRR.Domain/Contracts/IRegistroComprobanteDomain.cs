@@ -27,5 +27,6 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
         Tuple<bool, OVPM> RetrievePagoByRendicion(string value);
         OJDT RetrieveAsiento(string item2);
         void ActualizarEstadoRegistroRendicion(string value, string v);
+        Tuple<bool, string,string> RetrieveGastoByCode(string codServicioCompra);
     }
 }

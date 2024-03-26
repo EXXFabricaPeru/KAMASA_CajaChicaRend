@@ -139,6 +139,20 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
                 return Tuple.Create(false, exception.Message);
             }
         }
+
+        Tuple<bool, string> IMarketingDocumentDomain.CancelDocumentPurchaseInvoice(int entry)
+        {
+            try
+            {
+                UnitOfWork.PurchaseInvoiceRepository.UpdateDocument(entry);
+                UnitOfWork.PurchaseInvoiceRepository.CancelDocument(entry);
+                return Tuple.Create(true, string.Empty);
+            }
+            catch (Exception exception)
+            {
+                return Tuple.Create(false, exception.Message);
+            }
+        }
         //Tuple<bool, string> CancelDocumentInvoice(int entry)
         //{
         //    try
@@ -152,7 +166,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         //    }
         //}
 
-       
+
         public IEnumerable<ODLN> GetDocumentDelivery(string item2)
         {
             var cod = int.Parse(item2);

@@ -33,7 +33,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         public static RegistroComprobante Instance { get; private set; }
 
         public const string SAP_FORM_TYPE = "UDO_FT_EXX_RCCR_ORCR";
-
+        public const string ID = "FRM_REG_COM";
         private REC1 _selectedRendicion;
 
         /// <summary>
@@ -48,6 +48,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._liquidarButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._liquidarButton_ClickAfter);
             this._tipoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_2").Specific));
             this._detailMatrix = ((SAPbouiCOM.Matrix)(this.GetItem("0_U_G").Specific));
+            this._detailMatrix.LostFocusAfter += new SAPbouiCOM._IMatrixEvents_LostFocusAfterEventHandler(this._detailMatrix_LostFocusAfter);
             this._detailMatrix.KeyDownAfter += new SAPbouiCOM._IMatrixEvents_KeyDownAfterEventHandler(this._detailMatrix_KeyDownAfter);
             this._detailMatrix.ChooseFromListAfter += new SAPbouiCOM._IMatrixEvents_ChooseFromListAfterEventHandler(this._detailMatrix_ChooseFromListAfter);
             this._detailMatrix.ValidateAfter += new SAPbouiCOM._IMatrixEvents_ValidateAfterEventHandler(this._detailMatrix_ValidateAfter);
@@ -65,7 +66,6 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._searchRendicionButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._searchRendicionButton_ClickAfter);
             this._crearButton = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
             this._estadoCombox = ((SAPbouiCOM.ComboBox)(this.GetItem("21_U_Cb").Specific));
-            
             this.OnCustomInitialize();
 
         }
@@ -75,7 +75,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         /// </summary>
         public override void OnInitializeFormEvents()
         {
-            this.DataLoadAfter += new DataLoadAfterHandler(this.Form_DataLoadAfter);
+            this.DataLoadAfter += new SAPbouiCOM.Framework.FormBase.DataLoadAfterHandler(this.Form_DataLoadAfter);
+            this.RightClickBefore += new SAPbouiCOM.Framework.FormBase.RightClickBeforeHandler(this.Form_RightClickBefore);
+            this.ResizeAfter += new ResizeAfterHandler(this.Form_ResizeAfter);
 
         }
 
@@ -264,6 +266,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private static string ColumnaNombreProveedor = "C_0_2";
         private static string ColumnaFechaDoc = "C_0_3";
         private static string ColumnaFechaContable = "C_0_4";
+
+
+
         private static string ColumnaFechaVencimiento = "C_0_5";
         private static string ColumnaCondicionPago = "C_0_6";
         private static string ColumnaTipoDocumento = "C_0_7";
@@ -430,14 +435,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             _detailMatrix.FlushToDataSource();
             if (!string.IsNullOrEmpty(_ColSelect))
             {
+                _ColSelect = "";
+
+
+
                 //var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+
                 //codpre.Item.Click();
-                //_ColSelect = "";
+
             }
 
         }
 
-        private void ActualizarSaldo()
+        public void ActualizarSaldo()
         {
             ActualizarTotalGasto();
             _saldoEditText.Value = (_montoEditText.Value.ToDouble() - _totalGastoEditText.Value.ToDouble()).ToString();
@@ -461,6 +471,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         }
 
         string _ColSelect = "";
+        int columint = -1;
         int _rowSelect = -1;
         private void _detailMatrix_ChooseFromListAfter(object sboObject, SBOItemEventArg eventArgs)
         {
@@ -471,6 +482,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 if (eventArgs.ColUID == ColumnaCodigoProveedor)
                 {
                     _ColSelect = ColumnaCodigoProveedor;
+                    columint = 1;
                     SAPbouiCOM.DataTable selectedObjects = eventArgs.To<SAPbouiCOM.ISBOChooseFromListEventArg>().SelectedObjects;
                     if (selectedObjects == null)
                         return;
@@ -479,14 +491,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
 
                     var _item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNombreProveedor).Cells.Item(eventArgs.Row).Specific;
-                    _item.Value = nameProveedor; 
+                    _item.Value = nameProveedor;
 
                     _detailMatrix.FlushToDataSource();
                     _detailMatrix.AutoResizeColumns();
-                    
+
 
                     GenericHelper.ReleaseCOMObjects(selectedObjects);
                     _rowSelect = eventArgs.Row;
+                    //var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+
+                    //codpre.Item.Click();
+
+                    //_detailMatrix.SetCellFocus(eventArgs.Row, columint);
 
                 }
                 else if (eventArgs.ColUID == ColumnaCodigoGasto)
@@ -648,34 +665,41 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             line.TaxCode = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(i).Specific).Value;
                             line.Cuenta = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCuentaGasto).Cells.Item(i).Specific).Value;
                             line.CodServicioCompra = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoGasto).Cells.Item(i).Specific).Value;
+
                             line.GrupoDetraccion = "999";
                             line.CentroCosto = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension1).Cells.Item(i).Specific).Value;
                             line.CentroCosto3 = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension3).Cells.Item(i).Specific).Value;
                             lines.Add(line);
 
                             factura.DocumentLines = lines;
+                            var total = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(i).Specific).Value.ToDecimal();
+                            bool val = validarGasto(line.CodServicioCompra, total, factura.CardCode + "-" + factura.FolioPref + "-" + factura.FolioNum);
 
-                            var respuesta = _marketingDocumentDomain.RegisterPurchaseInvoice(factura);
-
-                            if (respuesta.Item1)
+                            if (val)
                             {
+                                var respuesta = _marketingDocumentDomain.RegisterPurchaseInvoice(factura);
 
-                                estado.Value = "Si";
-                                _detailMatrix.FlushToDataSource();
+                                if (respuesta.Item1)
+                                {
 
-                                var docentry = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDocEntry).Cells.Item(i).Specific;
-                                docentry.Value = respuesta.Item2;
-                                _detailMatrix.FlushToDataSource();
+                                    estado.Value = "Si";
+                                    _detailMatrix.FlushToDataSource();
 
-                                ActualizarEstado(factura.CardCode + "-" + factura.FolioPref + "-" + factura.FolioNum, "Si", respuesta.Item2);
+                                    var docentry = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDocEntry).Cells.Item(i).Specific;
+                                    docentry.Value = respuesta.Item2;
+                                    _detailMatrix.FlushToDataSource();
+
+                                    ActualizarEstado(factura.CardCode + "-" + factura.FolioPref + "-" + factura.FolioNum, "Si", respuesta.Item2);
+                                }
+                                else
+                                {
+                                    estado.Value = "No";
+                                    _detailMatrix.FlushToDataSource();
+                                    ActualizarEstado(factura.CardCode + "-" + factura.FolioPref + "-" + factura.FolioNum, "No", "");
+                                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("Error al registrar línea " + i + " - " + factura.FolioPref + "-" + factura.FolioPref + ": " + respuesta.Item2);
+                                }
                             }
-                            else
-                            {
-                                estado.Value = "No";
-                                _detailMatrix.FlushToDataSource();
-                                ActualizarEstado(factura.CardCode + "-" + factura.FolioPref + "-" + factura.FolioNum, "No", "");
-                                ApplicationInterfaceHelper.ShowErrorStatusBarMessage("Error al registrar línea " + i + " - " + factura.FolioPref + "-" + factura.FolioPref + ": " + respuesta.Item2);
-                            }
+
                         }
 
                     }
@@ -699,6 +723,49 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
             catch (Exception ex)
             {
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+        }
+
+        private bool validarGasto(string codServicioCompra, decimal total, string documento)
+        {
+            try
+            {
+                var detalleGasto = _registroComprobanteDomain.RetrieveGastoByCode(codServicioCompra);
+
+                if (detalleGasto.Item1)
+                {
+                    if (detalleGasto.Item2 == "999")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if (total >= detalleGasto.Item3.ToDecimal())
+                        {
+                            ApplicationInterfaceHelper.ShowErrorStatusBarMessage(documento + ": No se puede crear el documento por que tiene detracción");
+                            return false;
+                        }
+
+                        else
+                            return true;
+                    }
+
+                }
+                else
+                {
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage(detalleGasto.Item2);
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return false;
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
             }
             finally
@@ -770,7 +837,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
 
         }
-        
+
 
         private void _liquidarRendicion()
         {
@@ -779,11 +846,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                 //TODO VALIDAR que exista un pago relacionado a la rendición
 
-                var asientoReconciliacion= generarAsientoData();
+                var asientoReconciliacion = generarAsientoData();
 
                 if (asientoReconciliacion != null)
                 {
-                    var recon= generarReconciliacionData(asientoReconciliacion);
+                    var recon = generarReconciliacionData(asientoReconciliacion);
                     if (recon)
                     {
                         _estadoCombox.SelectByValue("L");
@@ -793,7 +860,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     }
                 }
 
-               
+
             }
             catch (Exception ex)
             {
@@ -818,7 +885,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     {
                         var total = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(i).Specific).Value;
                         var serie = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(i).Specific).Value;
-                        var numero =((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(i).Specific).Value.ToInt32();
+                        var numero = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(i).Specific).Value.ToInt32();
                         var numeracion = serie + "-" + numero;
                         var proveedor = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(i).Specific).Value;
 
@@ -827,7 +894,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                         recon.ReconDate = DateTime.Now;
                         recon.CardOrAccount = "C";
-                        var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t=>t.FolioPref==serie&&t.FolioNum==numero && t.CardCode==proveedor).FirstOrDefault();
+                        var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.FolioPref == serie && t.FolioNum == numero && t.CardCode == proveedor).FirstOrDefault();
                         //COMPROBANTE
                         ITR1 doc = new ITR1();
                         //doc.CreditOrDebit = "codDebit";
@@ -849,7 +916,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         //jdt.SrcObjAbs = int.Parse(item.DocEntry);
                         //jdt.SrcObjTyp = "13";
                         jdt.TransId = asientoReconciliacion.TransId;
-                        jdt.TransRowId = asientoReconciliacion.JournalEntryLines.Where(t=>t.LineMemo==numeracion && t.ShortName==proveedor).FirstOrDefault().Line.ToString();
+                        jdt.TransRowId = asientoReconciliacion.JournalEntryLines.Where(t => t.LineMemo == numeracion && t.ShortName == proveedor).FirstOrDefault().Line.ToString();
 
                         recon.InternalReconciliationOpenTransRows.Add(jdt);
 
@@ -890,16 +957,23 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
             catch (Exception ex)
             {
-                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);        
-            return false;
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+                return false;
             }
         }
 
         private OJDT generarAsientoData()
         {
+
+            //if (_tipoComboBox.Selected.Value == "ER")
+            //{
             var pago = _registroComprobanteDomain.RetrievePagoByRendicion(_nroRendicionEditText.Value);
             if (!pago.Item1)
+            {
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se encontró un pago relacionado en el campo \"Nro rendicion\", por favor revise o actualice el pago con el código de la rendición/caja chica");
                 return null;
+            }
+
 
             OITR reconcilicaion = new OITR();
             OJDT asientoRecon = new OJDT();
@@ -976,12 +1050,179 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             //var respuesta = _registroComprobanteDomain.RetrieveAsiento(asiento.Item2);
             return asiento.Item3;
+            //}
+            //else
+            //{
+            //    OITR reconcilicaion = new OITR();
+            //    OJDT asientoRecon = new OJDT();
+            //    asientoRecon.TransactionCode = "ASM";
+            //    asientoRecon.TaxDate = DateTime.Now;
+            //    asientoRecon.DueDate = DateTime.Now;
+            //    asientoRecon.ReferenceDate = DateTime.Now;
+            //    asientoRecon.Memo = "Asiento de reconciliación";
+
+            //    double totalCredit = 0;
+            //    double totalDebit = 0;
+
+            //    List<JDT1> lines = new List<JDT1>();
+
+            //    JDT1 lineCredit = new JDT1();
+            //    lineCredit.ShortName = pago.Item2.CardCode; //"E00045853455";
+            //    lineCredit.AccountCode = pago.Item2.BpAct;//"_SYS00000001366";
+            //    lineCredit.Credit = pago.Item2.DocTotal.ToDouble();//_montoEditText.Value.ToDouble();
+            //    lineCredit.BPLID = _sucursalComboBox.Value.ToInt32();
+            //    lineCredit.LineMemo = "Pago a Cuenta";
+            //    totalCredit = lineCredit.Credit;
+
+            //    return null;
+            //}
+
         }
 
         private void Form_DataLoadAfter(ref BusinessObjectInfo pVal)
         {
             _detailMatrix.AutoResizeColumns();
         }
+
+        public static readonly string ANULAR_DOCUMENTO = $"{ID}.anular.doc";
+        private void Form_RightClickBefore(ref ContextMenuInfo eventInfo, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            if (eventInfo.ItemUID != _detailMatrix.Item.UniqueID)
+                return;
+
+            if (UIAPIRawForm.Mode != BoFormMode.fm_ADD_MODE)
+            {
+                set_values_into_storage(eventInfo.Row);
+                UIAPIRawForm.IfMenuNoExistsMakeIt(ANULAR_DOCUMENTO, "Anular Documento");
+            }
+
+        }
+        int rowAnular = -1;
+        private void set_values_into_storage(int row)
+        {
+            LocalStorage.FRM_REG_COM = this;
+            rowAnular = row; ;
+        }
+
+        public bool validarLineaAEliminar()
+        {
+            try
+            {
+                var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
+                if (estado.Value == "Si")
+                {
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede eliminar una línea si está migrada o no está anulada");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+                return false;
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+            }
+
+
+        }
+
+
+        public void AnularDocumento()
+        {
+            try
+            {
+
+                var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
+                if (estado.Value == "Si")
+                {
+                    ApplicationInterfaceHelper.ShowDialogMessageBox("¿Está seguro de anular el comprobante?",
+                     () =>
+                     {
+                         _anularDocumento();
+                     },
+                     null);
+                }
+                else
+                {
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede anular el documento si no está creado");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+            }
+            finally
+            {
+                GenericHelper.ReleaseCOMObjects();
+                rowAnular = -1;
+            }
+        }
+
+        private void _anularDocumento()
+        {
+            var docentry = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDocEntry).Cells.Item(rowAnular).Specific;
+            //_marketingDocumentDomain.UpdateMarketingDocumentCustomFields
+            var respuesta = _marketingDocumentDomain.CancelDocumentPurchaseInvoice(docentry.Value.ToInt32());
+            if (respuesta.Item1)
+            {
+                var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
+                estado.Value = "No";
+                _detailMatrix.FlushToDataSource();
+                var CardCode = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(rowAnular).Specific).Value;
+                var FolioPref = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(rowAnular).Specific).Value;
+                var FolioNum = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(rowAnular).Specific).Value.ToInt32();
+                ActualizarEstado(CardCode + "-" + FolioPref + "-" + FolioNum, "No", "");
+                UIAPIRawForm.Refresh();
+                ApplicationInterfaceHelper.ShowSuccessStatusBarMessage("Documento Anulado");
+            }
+
+        }
+
+        private void Form_ResizeAfter(SBOItemEventArg pVal)
+        {
+            try
+            {
+                if (_detailMatrix != null)
+                    _detailMatrix.AutoResizeColumns();
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
+
+        private void _detailMatrix_LostFocusAfter(object sboObject, SBOItemEventArg eventArgs)
+        {
+            try
+            {
+                //if (!string.IsNullOrEmpty(_ColSelect))
+                //{
+                //    _ColSelect = "";
+
+
+
+                //    var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+
+                //    codpre.Item.Click();
+
+                //}
+            }
+            catch (Exception)
+            {
+            }
+
+        }
+
+
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
         //fechaDoc.Value = lineGrilla.FechaDoc.ToString("yyyyMMdd");
 

@@ -1792,7 +1792,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
             if (cancellationDocument.Add() == 0)
             {
                 var docentry = Company.GetNewObjectKey();
-                SendMessage_AlertAsync(sapDocument.NumAtCard, docentry);
+                //SendMessage_AlertAsync(sapDocument.NumAtCard, docentry);
                 return;
             }
             int errorCode;
@@ -1806,7 +1806,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
             var sapDocument = Company.GetBusinessObject(sapObject.SapTypes).To<Documents>();
             sapDocument.GetByKey(documentEntry);
 
-            sapDocument.UserFields.Fields.Item("U_VS_FESTAT").Value = "I";
+            sapDocument.FolioNumber = 0;
+            sapDocument.FolioPrefixString = "";
 
             if (sapDocument.Update() == 0)
             {
