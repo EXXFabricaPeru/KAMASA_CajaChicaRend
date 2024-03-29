@@ -66,6 +66,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._searchRendicionButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._searchRendicionButton_ClickAfter);
             this._crearButton = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
             this._estadoCombox = ((SAPbouiCOM.ComboBox)(this.GetItem("21_U_Cb").Specific));
+            this._addLineButton = ((SAPbouiCOM.Button)(this.GetItem("Item_5").Specific));
+            this._addLineButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._addLineButton_ClickAfter);
             this.OnCustomInitialize();
 
         }
@@ -111,12 +113,41 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 //loadSapFields(null);
 
                 _detailMatrix.AutoResizeColumns();
+
+                //var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(1).Specific;
+                ////var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                ////var fechaVenC = fechaCont.Value.DeepClone();
+                ////if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                ////{
+                //    fechaven.Value = "20240329";
+                //    return;
+                //}
+                if (UIAPIRawForm.IsAddMode())
+                {
+                    setValuesLines();
+                    _liquidarButton.Item.Enabled = false;
+                }
+
             }
             catch (Exception ex)
             {
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage("Iniciar formulario: " + ex.Message);
             }
             _detailMatrix.FlushToDataSource();
+
+        }
+
+        private void setValuesLines()
+        {
+            _detailMatrix.Clear();
+            _detailMatrix.AddRow();
+            ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(_detailMatrix.RowCount).Specific).Value = "Contado";
+            var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
+            var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
+
+            _igvED.Value = "IGV";
+            _igvPorED.Value = "18.0";
+
 
         }
 
@@ -204,7 +235,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             _infrastructureDomain.RetrievePaymentGroup()
                 .ForEach(t => validValues.Add(t.Item1, t.Item2));
-           
+
         }
 
         private void _searchRendicionButton_ClickAfter(object sboObject, SBOItemEventArg pVal)
@@ -329,24 +360,24 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 }
                 else if (eventArgs.ColUID == ColumnaTipoDocumento)
                 {
-                    conditions = ApplicationInterfaceHelper.ApplicationInstance
-                  .CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_Conditions)
-                  .To<SAPbouiCOM.Conditions>();
+                    //  conditions = ApplicationInterfaceHelper.ApplicationInstance
+                    //.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_Conditions)
+                    //.To<SAPbouiCOM.Conditions>();
 
-                    condition = conditions.Add();
-                    condition.Alias = @"Code";
-                    condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                    condition.CondVal = "01";
-                    condition.Relationship = BoConditionRelationship.cr_OR;
+                    //  condition = conditions.Add();
+                    //  condition.Alias = @"Code";
+                    //  condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+                    //  condition.CondVal = "01";
+                    //  condition.Relationship = BoConditionRelationship.cr_OR;
 
-                    condition = conditions.Add();
-                    condition.Alias = @"Code";
-                    condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                    condition.CondVal = "03";
+                    //  condition = conditions.Add();
+                    //  condition.Alias = @"Code";
+                    //  condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+                    //  condition.CondVal = "03";
 
 
-                    ChooseFromListConditions = UIAPIRawForm.ChooseFromLists.Item(@"CFL_TD");
-                    ChooseFromListConditions.SetConditions(conditions);
+                    //  ChooseFromListConditions = UIAPIRawForm.ChooseFromLists.Item(@"CFL_TD");
+                    //  ChooseFromListConditions.SetConditions(conditions);
                 }
                 else if (eventArgs.ColUID == ColumnaDimension1)
                 {
@@ -419,6 +450,22 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 //        _item.Value = _socio.CardName;
                 //    }
                 //}
+
+                if (eventArgs.ColUID == ColumnaFechaContable)
+                {
+                    //var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
+                    //var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                    //var fechaVenC = fechaCont.Value.DeepClone();
+                    //if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                    //{
+                    //    fechaven.Value = "20240329";
+                    //    return;
+                    //}
+                }
+
+                var _itemCondP = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(eventArgs.Row).Specific;
+                if (string.IsNullOrEmpty(_itemCondP.Value))
+                    _itemCondP.Value = "Contado";
 
 
 
@@ -494,8 +541,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var _item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNombreProveedor).Cells.Item(eventArgs.Row).Specific;
                     _item.Value = nameProveedor;
 
-                    //var _itemCondP = (SAPbouiCOM.ComboBox)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(eventArgs.Row).Specific;
-                    //_itemCondP.SelectByValue("5");
+
                     _detailMatrix.FlushToDataSource();
                     _detailMatrix.AutoResizeColumns();
 
@@ -547,7 +593,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
 
                     var impuesto = (valor.Value.ToDouble() * porcentaje.ToDouble() / 100);
-                    total.Value = (valor.Value.ToDouble() + impuesto).ToString();
+                    total.Value = (valor.Value.ToDouble() + impuesto).ToString("0.00");
 
                     _detailMatrix.FlushToDataSource();
                     ActualizarSaldo();
@@ -571,6 +617,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
+
                 if (eventArgs.ColUID == ColumnaValorUnitario || eventArgs.ColUID == ColumnaImpuestoPorcentaje)
                 {
 
@@ -580,7 +627,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
 
                     var impuesto = (valor.Value.ToDouble() * porcentaje.Value.ToDouble() / 100);
-                    total.Value = (valor.Value.ToDouble() + impuesto).ToString();
+                    total.Value = (valor.Value.ToDouble() + impuesto).ToString("0.00");
 
 
                     _detailMatrix.FlushToDataSource();
@@ -589,6 +636,17 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     GenericHelper.ReleaseCOMObjects();
 
                 }
+                //if (eventArgs.ColUID == ColumnaFechaContable)
+                //{
+                var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
+                var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                var fechaVenC = fechaCont.Value.DeepClone();
+                if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                {
+                    fechaven.Value = fechaVenC;//;"20240329";
+                    return;
+                }
+                //}
             }
             catch (Exception ex)
             {
@@ -652,7 +710,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             factura.FolioPref = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(i).Specific).Value;
                             factura.FolioNum = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(i).Specific).Value.ToInt32();
                             factura.Indicator = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(i).Specific).Value;
-                            factura.CondicionPago = ((SAPbouiCOM.ComboBox)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(i).Specific).Value.ToInt32();
+                            factura.CondicionPago = 5;//((SAPbouiCOM.ComboBox)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(i).Specific).Value.ToInt32();
                             factura.BranchId = _sucursalComboBox.Value.ToInt32();
                             factura.NumberAtCard = factura.FolioPref + "-" + factura.FolioNum;
                             factura.Comments = "Factura generada por el Addon de Registro Comprobante Rend/CC - Nro " + _nroRendicionEditText.Value;
@@ -821,14 +879,21 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     }
 
                 }
+                if (string.IsNullOrEmpty(DocFalta))
+                {
+                    ApplicationInterfaceHelper.ShowDialogMessageBox(DocFalta + " ¿Está seguro de liquidar la rendición/caja chica?, Luego de Liquidar no podrá revertir los cambios por el addon",
+                  () =>
+                  {
 
-                ApplicationInterfaceHelper.ShowDialogMessageBox(DocFalta + " ¿Está seguro de liquidar la rendición/caja chica?, Luego de Liquidar no podrá revertir los cambios por el addon",
-                   () =>
-                   {
+                      _liquidarRendicion();
+                  },
+                  null);
+                }
+                else
+                {
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage(DocFalta);
+                }
 
-                       _liquidarRendicion();
-                   },
-                   null);
             }
             catch (Exception ex)
             {
@@ -1221,6 +1286,31 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
             catch (Exception)
             {
+            }
+
+        }
+
+        private Button _addLineButton;
+
+        private void _addLineButton_ClickAfter(object sboObject, SBOItemEventArg pVal)
+        {
+            try
+            {
+                _detailMatrix.AddRow();
+                var codProv = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(_detailMatrix.RowCount).Specific;
+                codProv.Value = "";
+                var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
+                var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
+
+                _igvED.Value = "IGV";
+                _igvPorED.Value = "18.0";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+
+            }
+            catch (Exception)
+            {
+
             }
 
         }
