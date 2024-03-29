@@ -108,7 +108,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 }
 
                 FillComboBox();
-                loadSapFields(null);
+                //loadSapFields(null);
 
                 _detailMatrix.AutoResizeColumns();
             }
@@ -204,6 +204,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             _infrastructureDomain.RetrievePaymentGroup()
                 .ForEach(t => validValues.Add(t.Item1, t.Item2));
+           
         }
 
         private void _searchRendicionButton_ClickAfter(object sboObject, SBOItemEventArg pVal)
@@ -493,6 +494,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var _item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNombreProveedor).Cells.Item(eventArgs.Row).Specific;
                     _item.Value = nameProveedor;
 
+                    //var _itemCondP = (SAPbouiCOM.ComboBox)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(eventArgs.Row).Specific;
+                    //_itemCondP.SelectByValue("5");
                     _detailMatrix.FlushToDataSource();
                     _detailMatrix.AutoResizeColumns();
 
