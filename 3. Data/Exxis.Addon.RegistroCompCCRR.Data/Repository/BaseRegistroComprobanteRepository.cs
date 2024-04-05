@@ -33,6 +33,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract OJDT RetriveAsientoByCode(object asientoRecon);
         public abstract void ActualizarEstadoRegistroRendicion(string code, string estado);
         public abstract Tuple<bool, string, string> RetrieveGastoByCode(string codServicioCompra);
+        public abstract Tuple<bool, ORCT> GenerarPagoRecibido(OVPM doc);
+        public abstract Tuple<bool, OVPM> GenerarPagoEfectuado(OVPM doc);
+        public abstract double GetTipoCambio(DateTime fecha, string currency);
 
 
 

@@ -19,5 +19,13 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
         public string DocTotal { get; set; }
 
         public string TrsfrAcct { get; set; }
+
+        public string NroRendicion { get; set; }
+
+        public DateTime DocDate { get; set; }
+
+        public int BPLID { get; set; }
+
+      
     }
 }

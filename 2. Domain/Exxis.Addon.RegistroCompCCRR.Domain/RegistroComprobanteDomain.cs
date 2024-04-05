@@ -83,6 +83,21 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
            return UnitOfWork.RegistroComprobanteRepository.RetrieveGastoByCode(codServicioCompra);
         }
 
+        public Tuple<bool, ORCT> GenerarPagoRecibido(OVPM doc)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.GenerarPagoRecibido(doc);
+        }
+
+        public Tuple<bool, OVPM> GenerarPagoEfectuado(OVPM doc)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.GenerarPagoEfectuado(doc);
+        }
+
+        public double GetTipoCambio(DateTime fecha, string currency)
+        {
+            return UnitOfWork.RegistroComprobanteRepository.GetTipoCambio(fecha,currency);
+        }
+
 
 
 

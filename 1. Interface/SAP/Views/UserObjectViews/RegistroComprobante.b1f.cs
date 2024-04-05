@@ -617,7 +617,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-
+             
                 if (eventArgs.ColUID == ColumnaValorUnitario || eventArgs.ColUID == ColumnaImpuestoPorcentaje)
                 {
 
@@ -625,9 +625,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var valor = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(eventArgs.Row).Specific;
                     var porcentaje = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(eventArgs.Row).Specific;
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
+                    var moneda = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(eventArgs.Row).Specific;
+                    var fecha = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
+                    var tipoCambio = _registroComprobanteDomain.GetTipoCambio(fecha.GetDateTimeValue(),moneda.Value);
 
-                    var impuesto = (valor.Value.ToDouble() * porcentaje.Value.ToDouble() / 100);
-                    total.Value = (valor.Value.ToDouble() + impuesto).ToString("0.00");
+                    var impuesto = (valor.Value.ToDouble() * tipoCambio * porcentaje.Value.ToDouble() / 100);
+
+                    total.Value = (valor.Value.ToDouble() * tipoCambio + impuesto).ToString("0.00");
 
 
                     _detailMatrix.FlushToDataSource();
@@ -914,19 +918,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                 //TODO VALIDAR que exista un pago relacionado a la rendición
 
-                var asientoReconciliacion = generarAsientoData();
+                //var asientoReconciliacion = generarAsientoData();
 
-                if (asientoReconciliacion != null)
+                //if (asientoReconciliacion != null)
+                //{
+                var recon = generarReconciliacionData(null);
+                if (recon)
                 {
-                    var recon = generarReconciliacionData(asientoReconciliacion);
-                    if (recon)
-                    {
-                        _estadoCombox.SelectByValue("L");
-                        _registroComprobanteDomain.ActualizarEstadoRegistroRendicion(_codeEditText.Value, "L");
-                        ApplicationInterfaceHelper.ShowSuccessStatusBarMessage("Liquidación Completa");
-                        UIAPIRawForm.Refresh();
-                    }
+                    _estadoCombox.SelectByValue("L");
+                    _registroComprobanteDomain.ActualizarEstadoRegistroRendicion(_codeEditText.Value, "L");
+                    ApplicationInterfaceHelper.ShowSuccessStatusBarMessage("Liquidación Completa");
+                    UIAPIRawForm.Refresh();
                 }
+                //}
 
 
             }
@@ -944,6 +948,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
+                OITR recon = new OITR();
+
+                var pago = _registroComprobanteDomain.RetrievePagoByRendicion(_nroRendicionEditText.Value);
+
+                //if (_saldoEditText.Value.ToDecimal() == 0)
+                //{
 
                 for (int i = 1; i <= _detailMatrix.RowCount; i++)
                 {
@@ -957,7 +967,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         var numeracion = serie + "-" + numero;
                         var proveedor = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(i).Specific).Value;
 
-                        OITR recon = new OITR();
+
                         recon.InternalReconciliationOpenTransRows = new List<ITR1>();
 
                         recon.ReconDate = DateTime.Now;
@@ -978,48 +988,81 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         //Asiento
                         ITR1 jdt = new ITR1();
                         //jdt.CreditOrDebit = "codDebit";
-                        jdt.ReconcileAmount = total;
+                        jdt.ReconcileAmount = pago.Item2.DocTotal;
                         //jdt.ShortName = item.CardCode;
                         jdt.Selected = "Y";
                         //jdt.SrcObjAbs = int.Parse(item.DocEntry);
                         //jdt.SrcObjTyp = "13";
-                        jdt.TransId = asientoReconciliacion.TransId;
-                        jdt.TransRowId = asientoReconciliacion.JournalEntryLines.Where(t => t.LineMemo == numeracion && t.ShortName == proveedor).FirstOrDefault().Line.ToString();
+                        jdt.TransId = pago.Item2.TransId;
+                        jdt.TransRowId = "1";// asientoReconciliacion.JournalEntryLines.Where(t => t.LineMemo == numeracion && t.ShortName == proveedor).FirstOrDefault().Line.ToString();
 
                         recon.InternalReconciliationOpenTransRows.Add(jdt);
 
-                        var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
+
                     }
 
                 }
+                //}
+
+                if (_montoEditText.Value.ToDecimal() > _totalGastoEditText.Value.ToDecimal())
+                {
+                    pago.Item2.DocTotal = _saldoEditText.Value;
+                    var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pago.Item2);
+
+                    ITR1 doc = new ITR1();
+
+                    doc.ReconcileAmount = pagoRecibido.Item2.DocTotal;
+                    doc.Selected = "Y";
+                    doc.TransId = pagoRecibido.Item2.TransId.ToString();
+                    doc.TransRowId = "1";
+
+                    recon.InternalReconciliationOpenTransRows.Add(doc);
+                }
+
+                if (_montoEditText.Value.ToDecimal() < _totalGastoEditText.Value.ToDecimal())
+                {
+                    pago.Item2.DocTotal = (_totalGastoEditText.Value.ToDecimal() - _montoEditText.Value.ToDecimal()).ToString();
+                    var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pago.Item2);
+
+                    ITR1 doc = new ITR1();
+
+                    doc.ReconcileAmount = pagoEfectuado.Item2.DocTotal;
+                    doc.Selected = "Y";
+                    doc.TransId = pagoEfectuado.Item2.TransId.ToString();
+                    doc.TransRowId = "1";
+
+                    recon.InternalReconciliationOpenTransRows.Add(doc);
+                }
+                var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
+
 
                 //Liquidar Pago a Cuenta;
-                var pago = _registroComprobanteDomain.RetrievePagoByRendicion(_nroRendicionEditText.Value);
-                OITR reconPago = new OITR();
-                reconPago.InternalReconciliationOpenTransRows = new List<ITR1>();
+                //var pago = _registroComprobanteDomain.RetrievePagoByRendicion(_nroRendicionEditText.Value);
+                //OITR reconPago = new OITR();
+                //reconPago.InternalReconciliationOpenTransRows = new List<ITR1>();
 
-                reconPago.ReconDate = DateTime.Now;
-                reconPago.CardOrAccount = "C";
-                //COMPROBANTE
-                ITR1 doc1 = new ITR1();
-                doc1.ReconcileAmount = pago.Item2.DocTotal;
-                doc1.Selected = "Y";
-                doc1.TransId = pago.Item2.TransId;
-                doc1.TransRowId = "1";
+                //reconPago.ReconDate = DateTime.Now;
+                //reconPago.CardOrAccount = "C";
+                ////COMPROBANTE
+                //ITR1 doc1 = new ITR1();
+                //doc1.ReconcileAmount = pago.Item2.DocTotal;
+                //doc1.Selected = "Y";
+                //doc1.TransId = pago.Item2.TransId;
+                //doc1.TransRowId = "1";
 
-                reconPago.InternalReconciliationOpenTransRows.Add(doc1);
-                //Asiento
-                ITR1 doc2 = new ITR1();
-                //jdt.CreditOrDebit = "codDebit";
-                doc2.ReconcileAmount = pago.Item2.DocTotal;
-                //jdt.ShortName = item.CardCode;
-                doc2.Selected = "Y";
-                doc2.TransId = asientoReconciliacion.TransId;
-                doc2.TransRowId = "0";
+                //reconPago.InternalReconciliationOpenTransRows.Add(doc1);
+                ////Asiento
+                //ITR1 doc2 = new ITR1();
+                ////jdt.CreditOrDebit = "codDebit";
+                //doc2.ReconcileAmount = pago.Item2.DocTotal;
+                ////jdt.ShortName = item.CardCode;
+                //doc2.Selected = "Y";
+                //doc2.TransId = asientoReconciliacion.TransId;
+                //doc2.TransRowId = "0";
 
-                reconPago.InternalReconciliationOpenTransRows.Add(doc2);
+                //reconPago.InternalReconciliationOpenTransRows.Add(doc2);
 
-                var resp = _registroComprobanteDomain.GenerarReconciliacion(reconPago);
+                //var resp = _registroComprobanteDomain.GenerarReconciliacion(reconPago);
 
                 return true;
             }

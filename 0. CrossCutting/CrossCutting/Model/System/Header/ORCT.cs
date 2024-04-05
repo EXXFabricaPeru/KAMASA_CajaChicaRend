@@ -14,9 +14,18 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
     {
 
 
-        [FieldNoRelated("U_VS_LT_STAD", "Liquidado?", BoDbTypes.Alpha, Size = 2)]
-        [Val("N", "NO")]
-        [Val("Y", "SI")]
-        public string EstadoLiquidacion { get; set; }
+       
+        public string TransId { get; set; }
+        public string CardCode { get; set; }
+        public string BpAct { get; set; }
+        public string DocEntry { get; set; }
+        public string DocTotal { get; set; }
+
+        public string TrsfrAcct { get; set; }
+        public string NroRendicion { get; set; }
+
+
+        public DateTime DocDate { get; set; }
+        public int BPLID { get; set; }
     }
 }
