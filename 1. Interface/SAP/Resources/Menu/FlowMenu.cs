@@ -14,6 +14,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Resources.Menu
         //}
 
         public FlowMenu() : base(new SAPMenu { Id = $"EX.{ORCR.ID}", Description = "Registro Comprobantes CC/REND", TargetUDOClass = typeof(ORCR) })
+        //public FlowMenu() : base(new SAPMenu { Id = $"EX.{Form1.ID}", Description = "Registro Comprobantes CC/REND", TargetFormClass = typeof(Form1) })
         {
             order = 1;
         }

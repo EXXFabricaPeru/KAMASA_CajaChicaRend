@@ -236,6 +236,7 @@
     <Compile Include="Model\UDO\Header\OPDS.cs" />
     <Compile Include="Model\UDO\Header\OREN.cs" />
     <Compile Include="Model\UDO\Header\ORTR.cs" />
+    <Compile Include="Model\UDO\Header\OTDC.cs" />
     <Compile Include="Model\UDO\Header\OTMI.cs" />
     <Compile Include="Model\UDO\Header\OTMT.cs" />
     <Compile Include="Model\UDO\Header\OTPD.cs" />

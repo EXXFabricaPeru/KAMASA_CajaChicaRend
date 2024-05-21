@@ -16,7 +16,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions
 
         protected override void InitializeTables()
         {
-            CreateTable(typeof(OPDS));
+            CreateObject(typeof(OTDC));
 
         }
         protected override void InitializeFormattedSearch()

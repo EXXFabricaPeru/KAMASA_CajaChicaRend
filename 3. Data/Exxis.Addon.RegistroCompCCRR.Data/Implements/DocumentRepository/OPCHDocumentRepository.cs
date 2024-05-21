@@ -52,12 +52,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                 document.NumAtCard = entity.NumberAtCard;
                 document.DocCurrency = entity.Currency;
                 document.DocType = entity.Type == "S" ? BoDocumentTypes.dDocument_Service : BoDocumentTypes.dDocument_Items;
-                //Fields userFields = document.UserFields.Fields;
+                Fields userFields = document.UserFields.Fields;
                 //userFields.Item("U_VS_AFEDET").Value = "N";
                 //userFields.Item("U_VS_NATNUM").Value = entity.Naturaleza;
                 //userFields.Item("U_BPP_MDTD").Value = entity.TipoDocumento;
-                //userFields.Item("U_BPP_MDSD").Value = entity.SerieDocumento;
-                //userFields.Item("U_BPP_MDCD").Value = entity.CorrelativoDocumento;
+                userFields.Item("U_EXX_NUMEREND").Value = entity.NroRendicion;
+                userFields.Item("U_EXX_DESCREND").Value = entity.DescripcionRendicion;
+                userFields.Item("U_EXX_EMPLEADO").Value = entity.Empleado;
 
                 Document_Lines documentLines = document.Lines;
                 entity.DocumentLines.ForEach((line, index, lastIteration) =>

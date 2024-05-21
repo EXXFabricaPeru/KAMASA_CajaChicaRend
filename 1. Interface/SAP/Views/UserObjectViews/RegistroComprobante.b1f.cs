@@ -48,6 +48,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._liquidarButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._liquidarButton_ClickAfter);
             this._tipoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_2").Specific));
             this._detailMatrix = ((SAPbouiCOM.Matrix)(this.GetItem("0_U_G").Specific));
+            this._detailMatrix.ClickAfter += new SAPbouiCOM._IMatrixEvents_ClickAfterEventHandler(this._detailMatrix_ClickAfter);
             this._detailMatrix.LostFocusAfter += new SAPbouiCOM._IMatrixEvents_LostFocusAfterEventHandler(this._detailMatrix_LostFocusAfter);
             this._detailMatrix.KeyDownAfter += new SAPbouiCOM._IMatrixEvents_KeyDownAfterEventHandler(this._detailMatrix_KeyDownAfter);
             this._detailMatrix.ChooseFromListAfter += new SAPbouiCOM._IMatrixEvents_ChooseFromListAfterEventHandler(this._detailMatrix_ChooseFromListAfter);
@@ -461,7 +462,40 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     //    fechaven.Value = "20240329";
                     //    return;
                     //}
+                    var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
+                    var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                    var fechaVenC = fechaCont.Value.DeepClone();
+                    if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                    {
+                        fechaven.Value = fechaVenC;//;"20240329";
+                        _detailMatrix.FlushToDataSource();
+                        _detailMatrix.LoadFromDataSource();
+                        return;
+                    }
+
+                    if (fechaCont.Value != fechaven.Value)
+                    {
+                        fechaven.Value = fechaVenC;//;"20240329";
+                        _detailMatrix.FlushToDataSource();
+                        _detailMatrix.LoadFromDataSource();
+                        return;
+                    }
+
+                    _detailMatrix.FlushToDataSource();
+                    _detailMatrix.LoadFromDataSource();
                 }
+
+
+                //_ColSelect = "";
+                //_rowSelect = -1;
+                //if (eventArgs.ColUID == ColumnaCodigoProveedor)
+                //{
+
+                //    var codpro = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+                //    if (!string.IsNullOrEmpty(codpro.Value))
+                //        codpro.Active = true;
+
+                //}
 
                 var _itemCondP = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(eventArgs.Row).Specific;
                 if (string.IsNullOrEmpty(_itemCondP.Value))
@@ -542,15 +576,18 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _item.Value = nameProveedor;
 
 
-                    _detailMatrix.FlushToDataSource();
-                    _detailMatrix.AutoResizeColumns();
 
 
                     GenericHelper.ReleaseCOMObjects(selectedObjects);
-                    _rowSelect = eventArgs.Row;
-                    //var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+                    //_rowSelect = eventArgs.Row;
 
-                    //codpre.Item.Click();
+                    //var codpro = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
+                    ////codpro.Value = value.ToString();
+                    //codpro.Active = true;
+
+                    _detailMatrix.FlushToDataSource();
+                    _detailMatrix.AutoResizeColumns();
+
 
                     //_detailMatrix.SetCellFocus(eventArgs.Row, columint);
 
@@ -601,6 +638,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     GenericHelper.ReleaseCOMObjects(selectedObjects);
 
                 }
+
+
             }
             catch (Exception ex)
             {
@@ -617,7 +656,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-             
+
                 if (eventArgs.ColUID == ColumnaValorUnitario || eventArgs.ColUID == ColumnaImpuestoPorcentaje)
                 {
 
@@ -627,7 +666,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
                     var moneda = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(eventArgs.Row).Specific;
                     var fecha = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
-                    var tipoCambio = _registroComprobanteDomain.GetTipoCambio(fecha.GetDateTimeValue(),moneda.Value);
+                    var tipoCambio = _registroComprobanteDomain.GetTipoCambio(fecha.GetDateTimeValue(), moneda.Value);
 
                     var impuesto = (valor.Value.ToDouble() * tipoCambio * porcentaje.Value.ToDouble() / 100);
 
@@ -642,14 +681,24 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 }
                 //if (eventArgs.ColUID == ColumnaFechaContable)
                 //{
-                var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
-                var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
-                var fechaVenC = fechaCont.Value.DeepClone();
-                if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                if (eventArgs.ColUID == ColumnaFechaContable)
                 {
-                    fechaven.Value = fechaVenC;//;"20240329";
-                    return;
+                    var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
+                    var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                    var fechaVenC = fechaCont.Value.DeepClone();
+                    if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                    {
+                        fechaven.Value = fechaVenC;//;"20240329";
+                        return;
+                    }
+
+                    if (fechaCont.Value != fechaven.Value)
+                    {
+                        fechaven.Value = fechaVenC;//;"20240329";
+                        return;
+                    }
                 }
+
                 //}
             }
             catch (Exception ex)
@@ -720,6 +769,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             factura.Comments = "Factura generada por el Addon de Registro Comprobante Rend/CC - Nro " + _nroRendicionEditText.Value;
                             factura.Currency = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(i).Specific).Value;
                             factura.Type = "S";
+
+                            factura.NroRendicion = _nroRendicionEditText.Value;
+                            factura.DescripcionRendicion = _descripcionEditText.Value;
+                            factura.Empleado = _empleadoEditText.Value;
+
 
                             List<PCH1> lines = new List<PCH1>();
                             PCH1 line = new PCH1();
@@ -1220,16 +1274,22 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-                var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
-                if (estado.Value == "Si")
+                if (!UIAPIRawForm.IsAddMode())
                 {
-                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede eliminar una línea si está migrada o no está anulada");
-                    return false;
+                    var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
+                    if (estado.Value == "Si")
+                    {
+                        ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede eliminar una línea si está migrada o no está anulada");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
                 else
-                {
                     return true;
-                }
+
             }
             catch (Exception ex)
             {
@@ -1340,8 +1400,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             try
             {
                 _detailMatrix.AddRow();
-                var codProv = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(_detailMatrix.RowCount).Specific;
-                codProv.Value = "";
+
                 var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
                 var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
 
@@ -1350,9 +1409,48 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
 
+                var codProv = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(_detailMatrix.RowCount).Specific;
+                codProv.Value = "";
             }
             catch (Exception)
             {
+
+            }
+
+        }
+
+        private void _detailMatrix_ClickAfter(object sboObject, SBOItemEventArg eventArgs)
+        {
+            try
+            {
+                if (eventArgs.ColUID == ColumnaFechaContable)
+                {
+                    //var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
+                    //var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
+                    //var fechaVenC = fechaCont.Value.DeepClone();
+                    //if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                    //{
+                    //    fechaven.Value = fechaVenC;//;"20240329";
+                    //    _detailMatrix.FlushToDataSource();
+                    //    _detailMatrix.LoadFromDataSource();
+                    //    return;
+                    //}
+
+                    //if (fechaCont.Value != fechaven.Value)
+                    //{
+                    //    fechaven.Value = fechaVenC;//;"20240329";
+                    //    _detailMatrix.FlushToDataSource();
+                    //    _detailMatrix.LoadFromDataSource();
+                    //    return;
+                    //}
+
+                    //_detailMatrix.FlushToDataSource();
+                    //_detailMatrix.LoadFromDataSource();
+                }
+            }
+            catch (Exception)
+            {
+
 
             }
 

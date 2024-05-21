@@ -198,16 +198,22 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Customizations
 
             else if (menuEvent.MenuUID == "EXX_RCCR_ORCR_Remove_Line" && menuEvent.BeforeAction == true)
             {
-                if (LocalStorage.FRM_REG_COM.validarLineaAEliminar())
+                if (LocalStorage.FRM_REG_COM != null)
                 {
+                    if (LocalStorage.FRM_REG_COM.validarLineaAEliminar())
+                    {
+                        LocalStorage.FRM_REG_COM.ActualizarSaldo();
+                        handle = true;
+                    }
+                    else
+                    {
+                        handle = false;
+                    }
+
                     LocalStorage.FRM_REG_COM.ActualizarSaldo();
-                    handle = true;
                 }
-                else
-                {
-                    handle = false;
-                }
-                LocalStorage.FRM_REG_COM.ActualizarSaldo();
+               
+                
                 //ApplicationInterfaceHelper.ShowStatusBarMessage("No se puede eliminar líneas", BoMessageTime.bmt_Medium, BoStatusBarMessageType.smt_Error);
                 //handle = false;
             }

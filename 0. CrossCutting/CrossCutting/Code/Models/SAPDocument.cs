@@ -136,7 +136,9 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         }
 
 
-
+        public string NroRendicion { get; set; }
+        public string DescripcionRendicion { get; set; }
+        public string Empleado { get; set; }
 
         //[SAPColumn("U_VS_BULPAL", false)]
         public int NumeroBultosPallets { get; set; }

@@ -19,7 +19,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
         {
             versionCollection.Add(Version_0_0_0_1.Make);
             versionCollection.Add(Version_0_0_0_2.Make);
-            //versionCollection.Add(Version_0_0_0_3.Make);
+            versionCollection.Add(Version_0_0_0_3.Make);
             //versionCollection.Add(Version_0_0_0_4.Make);
             //versionCollection.Add(Version_0_0_0_5.Make);
 
