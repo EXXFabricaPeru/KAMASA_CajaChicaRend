@@ -216,6 +216,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 openTrans.ReconDate = reconciliacion.ReconDate;
 
                 int cont = 0;
+                
                 foreach (var item in reconciliacion.InternalReconciliationOpenTransRows)
                 {
                     openTrans.InternalReconciliationOpenTransRows.Add();
@@ -383,8 +384,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             List<REC1> list = new List<REC1>();
 
             var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
-            var query = "select R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
-                "where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}' ";
+            var query = "select \"U_EXX_ORCR_STAD\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
+                " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\"   " +
+                " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
+                " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
             recordSet.DoQuery(string.Format(query, tipoRendicion));
             IList<Tuple<string, string>> result = new List<Tuple<string, string>>();
             while (!recordSet.EoF)

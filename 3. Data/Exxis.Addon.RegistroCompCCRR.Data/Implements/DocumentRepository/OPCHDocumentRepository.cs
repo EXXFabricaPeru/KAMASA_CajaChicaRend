@@ -75,10 +75,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                     documentLines.AccountCode = cuenta;//line.Cuenta;
                     documentLines.TaxCode = line.TaxCode;
 
-                    Fields userFields = documentLines.UserFields.Fields;
+                    Fields oUserFields = documentLines.UserFields.Fields;
 
-                    userFields.Item("U_EXX_SERCOMPR").Value = line.CodServicioCompra;
-                    userFields.Item("U_EXX_GRUPODET").Value = line.GrupoDetraccion;
+                    oUserFields.Item("U_EXX_SERCOMPR").Value = line.CodServicioCompra;
+                    oUserFields.Item("U_EXX_GRUPODET").Value = line.GrupoDetraccion;
 
 
                     //documentLines.BaseType = line.BaseType;
