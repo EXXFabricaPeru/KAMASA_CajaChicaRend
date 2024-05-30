@@ -211,6 +211,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(_detailMatrix.RowCount).Specific).Value = "Contado";
             var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
             var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
+
+         
+            
             try
             {
                 _igvED.Value = "IGV";
@@ -220,11 +223,50 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             {
             }
 
-
+            cflTD();
 
 
         }
 
+        void cflTD()
+        {
+         
+            try
+            {
+                ChooseFromListCollection oCFLs = UIAPIRawForm.ChooseFromLists;
+
+                // Create ChooseFromList
+                ChooseFromListCreationParams oCFLCreationParams =
+                    (ChooseFromListCreationParams)ApplicationInterfaceHelper.ApplicationInstance.CreateObject(BoCreatableObjectType.cot_ChooseFromListCreationParams);
+
+                oCFLCreationParams.MultiSelection = false;
+                oCFLCreationParams.ObjectType = "EXX_RCCR_TDOC"; // Object Type for Business Partners
+                oCFLCreationParams.UniqueID = "CFL123";
+                
+
+                ChooseFromList oCFL = oCFLs.Add(oCFLCreationParams);
+                oCFL.IsAutoFill = true;
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            try
+            {
+                var column = _detailMatrix.Columns.Item(ColumnaTipoDocumento);
+
+                column.ChooseFromListUID = "CFL123";
+                column.ChooseFromListAlias = "Code";
+                //column.choo
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
         public void ClearFormToAddMode()
         {
             SAPbouiCOM.CommonSetting commonSetting = null;
