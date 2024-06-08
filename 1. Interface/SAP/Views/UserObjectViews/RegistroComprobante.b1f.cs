@@ -47,6 +47,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._liquidarButton = ((SAPbouiCOM.Button)(this.GetItem("Item_1").Specific));
             this._liquidarButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._liquidarButton_ClickAfter);
             this._tipoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_2").Specific));
+            this._tipoComboBox.ComboSelectAfter += new SAPbouiCOM._IComboBoxEvents_ComboSelectAfterEventHandler(this._tipoComboBox_ComboSelectAfter);
             this._detailMatrix = ((SAPbouiCOM.Matrix)(this.GetItem("0_U_G").Specific));
             this._detailMatrix.ClickAfter += new SAPbouiCOM._IMatrixEvents_ClickAfterEventHandler(this._detailMatrix_ClickAfter);
             this._detailMatrix.LostFocusAfter += new SAPbouiCOM._IMatrixEvents_LostFocusAfterEventHandler(this._detailMatrix_LostFocusAfter);
@@ -79,18 +80,18 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this.EditText1 = ((SAPbouiCOM.EditText)(this.GetItem("Item_12").Specific));
             this.ComboBox0 = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_13").Specific));
             this.EditText2 = ((SAPbouiCOM.EditText)(this.GetItem("Item_14").Specific));
-            this.EditText3 = ((SAPbouiCOM.EditText)(this.GetItem("Item_15").Specific));
-            this.StaticText5 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_16").Specific));
-            this.EditText4 = ((SAPbouiCOM.EditText)(this.GetItem("Item_17").Specific));
-            this.LinkedButton0 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_18").Specific));
-            this.EditText5 = ((SAPbouiCOM.EditText)(this.GetItem("Item_19").Specific));
-            this.EditText6 = ((SAPbouiCOM.EditText)(this.GetItem("Item_20").Specific));
-            this.LinkedButton1 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_21").Specific));
-            this.LinkedButton2 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_22").Specific));
-            this.StaticText6 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_23").Specific));
-            this.EditText7 = ((SAPbouiCOM.EditText)(this.GetItem("Item_24").Specific));
-            this.EditText8 = ((SAPbouiCOM.EditText)(this.GetItem("Item_25").Specific));
-            this.LinkedButton3 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_26").Specific));
+            this._devolucionEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_15").Specific));
+            this._devolucionLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_16").Specific));
+            this._codLiquidacionEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_17").Specific));
+            this._linkCodLiqui = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_18").Specific));
+            this._codDevolucionEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_19").Specific));
+            this._codSaldoEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_20").Specific));
+            this._linkSaldo = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_21").Specific));
+            this._linkDevolucion = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_22").Specific));
+            this._reembolsoCajaLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_23").Specific));
+            this._reembolsoCajaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_24").Specific));
+            this._codReembolsoCajaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_25").Specific));
+            this._linkReembolso = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_26").Specific));
             this.OnCustomInitialize();
 
         }
@@ -1786,20 +1787,62 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private EditText EditText1;
         private ComboBox ComboBox0;
         private EditText EditText2;
-        private EditText EditText3;
-        private StaticText StaticText5;
-        private EditText EditText4;
-        private LinkedButton LinkedButton0;
-        private EditText EditText5;
-        private EditText EditText6;
-        private LinkedButton LinkedButton1;
-        private LinkedButton LinkedButton2;
-        private StaticText StaticText6;
-        private EditText EditText7;
-        private EditText EditText8;
-        private LinkedButton LinkedButton3;
+        private EditText _devolucionEditText;
+        private StaticText _devolucionLabel;
+        private EditText _codLiquidacionEditText;
+        private LinkedButton _linkCodLiqui;
+        private EditText _codDevolucionEditText;
+        private EditText _codSaldoEditText;
+        private LinkedButton _linkSaldo;
+        private LinkedButton _linkDevolucion;
+        private StaticText _reembolsoCajaLabel;
+        private EditText _reembolsoCajaEditText;
+        private EditText _codReembolsoCajaEditText;
+        private LinkedButton _linkReembolso;
 
+        private void _tipoComboBox_ComboSelectAfter(object sboObject, SBOItemEventArg pVal)
+        {
 
+            validarCamposReferenciados();
+        }
+
+        private void validarCamposReferenciados()
+        {
+
+            try
+            {
+                if (_tipoComboBox.Value == "ER")
+                {
+                    _reembolsoCajaLabel.Item.Visible = false;
+                    _reembolsoCajaEditText.Item.Visible = false;
+                    _linkReembolso.Item.Visible = false;
+                    _codReembolsoCajaEditText.Item.Visible = false;
+                    _devolucionLabel.Item.Visible = true;
+                    _devolucionEditText.Item.Visible = true;
+                    _codDevolucionEditText.Item.Visible = true;
+                    _linkDevolucion.Item.Visible = true;
+                    _codSaldoEditText.Item.Visible = true;
+                    _linkSaldo.Item.Visible = true;
+                }
+                else
+                {
+                    _reembolsoCajaLabel.Item.Visible = true;
+                    _reembolsoCajaEditText.Item.Visible = true;
+                    _linkReembolso.Item.Visible = true;
+                    _codReembolsoCajaEditText.Item.Visible = true;
+                    _devolucionLabel.Item.Visible = false;
+                    _devolucionEditText.Item.Visible = false;
+                    _codDevolucionEditText.Item.Visible = false;
+                    _linkDevolucion.Item.Visible = false;
+                    _codSaldoEditText.Item.Visible = false;
+                    _linkSaldo.Item.Visible = false;
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+        }
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
         //fechaDoc.Value = lineGrilla.FechaDoc.ToString("yyyyMMdd");
 
