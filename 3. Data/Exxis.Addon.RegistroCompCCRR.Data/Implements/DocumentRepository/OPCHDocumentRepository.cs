@@ -71,7 +71,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                     BaseInfrastructureRepository infraRepository = new UnitOfWork(Company).InfrastructureRepository;
 
                     string cuenta = infraRepository.RetrieveAccountCodeByActID(line.Cuenta.Replace("-",""));
-
+                    if (string.IsNullOrEmpty(cuenta))
+                    {
+                        throw new Exception("No se ha configurado o no existe la cuenta del servicio");
+                    }
                     documentLines.AccountCode = cuenta;//line.Cuenta;
                     documentLines.TaxCode = line.TaxCode;
 

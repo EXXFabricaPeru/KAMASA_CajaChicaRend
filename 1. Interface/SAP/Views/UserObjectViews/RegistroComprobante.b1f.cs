@@ -834,16 +834,40 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var fechaven = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(eventArgs.Row).Specific;
                     var fechaCont = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(eventArgs.Row).Specific;
                     var fechaVenC = fechaCont.Value.DeepClone();
-                    if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                    try
                     {
-                        fechaven.Value = fechaVenC;//;"20240329";
-                        return;
+                        if (!string.IsNullOrEmpty(fechaCont.Value) && string.IsNullOrEmpty(fechaven.Value))
+                        {
+                            fechaven.Value = fechaVenC;//;"20240329";
+                            return;
+                        }
+
+                        if (fechaCont.Value != fechaven.Value)
+                        {
+                            fechaven.Value = fechaVenC;//;"20240329";
+                            return;
+                        }
+                    }
+                    catch (Exception ex2)
+                    {
+                        if (ex2.Message.Contains("Valor de fecha no válido"))
+                        {
+
+                        }
+                        else
+                        {
+                            throw new Exception(ex2.Message);
+                        }
                     }
 
-                    if (fechaCont.Value != fechaven.Value)
+                    if (eventArgs.CharPressed == 9)
                     {
-                        fechaven.Value = fechaVenC;//;"20240329";
-                        return;
+                        var select = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(eventArgs.Row).Specific;
+                        UIAPIRawForm.Select();
+                        select.Item.Click();
+                        select.Active = true;
+                        _after = false;
+                        cellvalue = "";
                     }
                 }
 
@@ -1621,8 +1645,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             try
             {
                 _detailMatrix.FlushToDataSource();
-
                 var lastLine = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaLineID).Cells.Item(_detailMatrix.RowCount).Specific;
+
+                if (_detailMatrix.RowCount == 1)
+                {
+                    var codProv2 = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(_detailMatrix.RowCount).Specific;
+                    if (string.IsNullOrEmpty(codProv2.Value))
+                    {
+                        codProv2.Value = "";
+                        return;
+                    }
+                }
+
+              
 
                 _detailMatrix.AddRow();
 
@@ -1633,19 +1668,41 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                 _igvED.Value = "IGV";
                 _igvPorED.Value = "18.0";
-                linea.Value = (int.Parse(lastLine.Value) + 1).ToString();
+                if (!UIAPIRawForm.IsAddMode())
+                    linea.Value = (int.Parse(lastLine.Value) + 1).ToString();
+                UIAPIRawForm.Freeze(true);
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNumFolio).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
                 ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDocEntry).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
 
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaNombreProveedor).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaContable).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaVencimiento).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoGasto).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCuentaGasto).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension1).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension3).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(_detailMatrix.RowCount).Specific).Value = "";
+                UIAPIRawForm.Freeze(false);
 
                 var codProv = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(_detailMatrix.RowCount).Specific;
                 codProv.Value = "";
+
+                //UIAPIRawForm.Select();
+                //codProv.Value = cellvalue;
+                //codProv.Item.Click();
+                //codProv.Active = true;
+                //_after = false;
+                //cellvalue = "";
             }
             catch (Exception)
             {
-
+                UIAPIRawForm.Freeze(false);
             }
 
         }
