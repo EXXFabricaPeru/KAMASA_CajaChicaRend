@@ -18,7 +18,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions
 
         protected override void InitializeTables()
         {
-            SyncSystemTable(typeof(ODLN));
+            CreateObject(typeof(ORCR));
 
         }
         protected override void InitializeFormattedSearch()

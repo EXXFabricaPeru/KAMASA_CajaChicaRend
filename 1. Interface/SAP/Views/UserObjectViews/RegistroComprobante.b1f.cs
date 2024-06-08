@@ -70,6 +70,27 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._estadoCombox = ((SAPbouiCOM.ComboBox)(this.GetItem("21_U_Cb").Specific));
             this._addLineButton = ((SAPbouiCOM.Button)(this.GetItem("Item_5").Specific));
             this._addLineButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._addLineButton_ClickAfter);
+            this.StaticText0 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_6").Specific));
+            this.StaticText1 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_7").Specific));
+            this.StaticText2 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_8").Specific));
+            this.StaticText3 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_9").Specific));
+            this.StaticText4 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_10").Specific));
+            this.EditText0 = ((SAPbouiCOM.EditText)(this.GetItem("Item_11").Specific));
+            this.EditText1 = ((SAPbouiCOM.EditText)(this.GetItem("Item_12").Specific));
+            this.ComboBox0 = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_13").Specific));
+            this.EditText2 = ((SAPbouiCOM.EditText)(this.GetItem("Item_14").Specific));
+            this.EditText3 = ((SAPbouiCOM.EditText)(this.GetItem("Item_15").Specific));
+            this.StaticText5 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_16").Specific));
+            this.EditText4 = ((SAPbouiCOM.EditText)(this.GetItem("Item_17").Specific));
+            this.LinkedButton0 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_18").Specific));
+            this.EditText5 = ((SAPbouiCOM.EditText)(this.GetItem("Item_19").Specific));
+            this.EditText6 = ((SAPbouiCOM.EditText)(this.GetItem("Item_20").Specific));
+            this.LinkedButton1 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_21").Specific));
+            this.LinkedButton2 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_22").Specific));
+            this.StaticText6 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_23").Specific));
+            this.EditText7 = ((SAPbouiCOM.EditText)(this.GetItem("Item_24").Specific));
+            this.EditText8 = ((SAPbouiCOM.EditText)(this.GetItem("Item_25").Specific));
+            this.LinkedButton3 = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_26").Specific));
             this.OnCustomInitialize();
 
         }
@@ -1755,6 +1776,28 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             habilitarLiquidadods();
 
         }
+
+        private StaticText StaticText0;
+        private StaticText StaticText1;
+        private StaticText StaticText2;
+        private StaticText StaticText3;
+        private StaticText StaticText4;
+        private EditText EditText0;
+        private EditText EditText1;
+        private ComboBox ComboBox0;
+        private EditText EditText2;
+        private EditText EditText3;
+        private StaticText StaticText5;
+        private EditText EditText4;
+        private LinkedButton LinkedButton0;
+        private EditText EditText5;
+        private EditText EditText6;
+        private LinkedButton LinkedButton1;
+        private LinkedButton LinkedButton2;
+        private StaticText StaticText6;
+        private EditText EditText7;
+        private EditText EditText8;
+        private LinkedButton LinkedButton3;
 
 
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
