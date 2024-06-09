@@ -58,5 +58,6 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Detail
         [SAPColumn("CostingCode")]
         public string CostingCode { get; set; }
         public int BPLID { get; set; }
+        public int idflujo { get; set; }
     }
 }

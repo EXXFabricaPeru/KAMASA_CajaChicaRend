@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 {
@@ -440,7 +441,36 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 _selectedRendicion = _registroComprobanteDomain.RetrieveRendicionByCode(documentEntry);
                 if (_selectedRendicion != null)
                 {
-                    populate_header();
+                    if (_tipoComboBox.Selected.Value == "CC")
+                    {
+                        string nextCorrelative = GetNextCorrelative(_nroRendicionEditText.Value);
+                        var nextCC = _registroComprobanteDomain.RetrieveRendicionByCode(nextCorrelative);
+
+                        if (nextCC != null)
+                        {
+                            if (nextCC.CodigoRendicion != null)
+                            {
+                                populate_header();
+                                _cchSiguienteEditeText.Value = nextCC.CodigoRendicion;
+
+                            }
+                            else
+                            {
+                                throw new Exception("Primero debe registrar la siguiente Caja chica");
+
+                            }
+                        }
+                        else
+                            throw new Exception("Primero debe registrar la siguiente Caja chica");
+
+                    }
+                    else
+                    {
+                        populate_header();
+
+                    }
+
+
 
                 }
             }
@@ -448,6 +478,28 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             {
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage("sync_headers_from_rendicion_entry_edit_text: " + ex.Message);
             }
+        }
+
+        public static string GetNextCorrelative(string input)
+        {
+            // Expresión regular para separar la parte alfabética de la numérica
+            Regex regex = new Regex(@"([a-zA-Z]+)(\d+)");
+            Match match = regex.Match(input);
+
+            if (match.Success)
+            {
+                string prefix = match.Groups[1].Value; // Parte alfabética: "CC"
+                string numberPart = match.Groups[2].Value; // Parte numérica: "00000301"
+
+                // Convertir la parte numérica a un entero, incrementar en 1 y convertir de nuevo a string
+                int number = int.Parse(numberPart) + 1;
+                string newNumberPart = number.ToString(new string('0', numberPart.Length)); // Mantener el mismo número de dígitos
+
+                // Combinar el prefijo con la nueva parte numérica
+                return prefix + newNumberPart;
+            }
+
+            throw new ArgumentException("El formato de entrada no es válido.");
         }
 
         private void populate_header()
@@ -701,23 +753,50 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             ActualizarTotalGasto();
             var resto = _montoEditText.Value.ToDouble() - _totalGastoEditText.Value.ToDouble();
 
-            if (resto > 0)
+            if (_tipoComboBox.Selected != null)
             {
-                _devolucionEditText.Value = resto.ToString();
-                _saldoEditText.Value = "0";
+                if (_tipoComboBox.Selected.Value == "ER")
+                {
+                    if (resto > 0)
+                    {
+                        _devolucionEditText.Value = resto.ToString();
+                        _saldoEditText.Value = "0";
+                    }
+
+                    else if (resto == 0)
+                    {
+                        _devolucionEditText.Value = "0";
+                        _saldoEditText.Value = "0";
+                    }
+                    else if (resto < 0)
+                    {
+                        _devolucionEditText.Value = "0";
+                        _saldoEditText.Value = (resto * -1).ToString();
+                    }
+
+                }
+                else
+                {
+                    _reembolsoCajaEditText.Value = _totalGastoEditText.Value;
+                    if (resto > 0)
+                    {
+                        _saldoEditText.Value = resto.ToString();
+
+                    }
+
+                    else if (resto == 0)
+                    {
+                        _saldoEditText.Value = "0";
+                    }
+                    else if (resto < 0)
+                    {
+                        _saldoEditText.Value = (resto * -1).ToString();
+                    }
+
+                }
             }
-                
-            else if (resto == 0)
-            {
-                _devolucionEditText.Value = "0";
-                _saldoEditText.Value = "0";
-            }
-            else if (resto < 0)
-            {
-                _devolucionEditText.Value = "0";
-                _saldoEditText.Value = (resto * -1).ToString();
-            }
-             
+        
+
 
         }
         private void ActualizarTotalGasto()
@@ -1279,7 +1358,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                             recon.ReconDate = DateTime.Now.AddDays(2);//cambiar luego
                             recon.CardOrAccount = "C";
-                            var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.DocumentEntry== docentry).FirstOrDefault();
+                            var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.DocumentEntry == docentry).FirstOrDefault();
                             //COMPROBANTE
                             ITR1 doc = new ITR1();
                             //doc.CreditOrDebit = "codDebit";
@@ -1313,57 +1392,110 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                     recon.InternalReconciliationOpenTransRows.Add(jdt);
 
-                    if (_montoEditText.Value.ToDecimal() > _totalGastoEditText.Value.ToDecimal())
+                    if (_tipoComboBox.Selected.Value == "ER")
                     {
-                        pago.Item2.DocTotal = _devolucionEditText.Value;
-                        var pagoLocal = pago.Item2;
+                        if (_montoEditText.Value.ToDecimal() > _totalGastoEditText.Value.ToDecimal())
+                        {
+                            pago.Item2.DocTotal = _devolucionEditText.Value;
+                            var pagoLocal = pago.Item2;
 
-                        pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
-                        pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
-                        pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
-                        pagoLocal.Comments = _referenciaEditText.Value;
+                            pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
+                            pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                            pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
+                            pagoLocal.Comments = _referenciaEditText.Value;
 
-                        var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pagoLocal);
+                            var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pagoLocal);
+                            var regCom = new ORCR();
+
+                            regCom.CodDevolucion = pagoRecibido.Item2.DocEntry;
+                            _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
+
+                            ITR1 doc = new ITR1();
+
+                            doc.ReconcileAmount = pagoRecibido.Item2.DocTotal;
+                            doc.Selected = "Y";
+                            doc.TransId = pagoRecibido.Item2.TransId.ToString();
+                            doc.TransRowId = "1";
+
+                            recon.InternalReconciliationOpenTransRows.Add(doc);
+                        }
+
+                        if (_montoEditText.Value.ToDecimal() < _totalGastoEditText.Value.ToDecimal())
+                        {
+                            //pago.Item2.DocTotal = (_totalGastoEditText.Value.ToDecimal() - _montoEditText.Value.ToDecimal()).ToString();
+                            pago.Item2.DocTotal = _saldoEditText.Value;
+                            var pagoLocal = pago.Item2;
+                            pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
+                            pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                            pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
+                            pagoLocal.Comments = _referenciaEditText.Value;
+
+                            var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pagoLocal);
+
+                            var regCom = new ORCR();
+                            regCom.CodReembolso = pagoEfectuado.Item2.DocEntry;
+                            _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
+
+                            ITR1 doc = new ITR1();
+
+                            doc.ReconcileAmount = pagoEfectuado.Item2.DocTotal;
+                            doc.Selected = "Y";
+                            doc.TransId = pagoEfectuado.Item2.TransId.ToString();
+                            doc.TransRowId = "1";
+
+                            recon.InternalReconciliationOpenTransRows.Add(doc);
+                        }
+
+                    }
+                    else
+                    {
+
+                        var asiento = new OJDT();
+                        asiento.Reference2 = _cchSiguienteEditeText.Value;
+                        asiento.TransactionCode = "ASM";
+                        asiento.DueDate = _fechaEditText.GetDateTimeValue();
+                        asiento.ReferenceDate = _fechaEditText.GetDateTimeValue();
+                        asiento.TaxDate= _fechaEditText.GetDateTimeValue();
+                        asiento.Memo = "Asiento Generado por el Addon de RRCC";
+                        asiento.JournalEntryLines = new List<JDT1>();
+
+                        var line1 = new JDT1();
+                        line1.BPLID = _sucursalComboBox.Selected.Value.ToInt32();
+                        line1.AccountCode= _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                        line1.Debit = _saldoEditText.Value.ToDouble();
+                        line1.Reference2= _cchSiguienteEditeText.Value;
+                        line1.ShortName = line1.AccountCode;
+                        line1.LineMemo = _cchSiguienteEditeText.Value;
+                        line1.idflujo = _flujoComboBox.Selected.Value.ToInt32();
+                        asiento.JournalEntryLines.Add(line1);
+
+                        var line2 = new JDT1();
+                        line2.BPLID = _sucursalComboBox.Selected.Value.ToInt32();
+                        line2.AccountCode = pago.Item2.BpAct;
+                        line2.Credit = _saldoEditText.Value.ToDouble();
+                        line2.Reference2 = _cchSiguienteEditeText.Value;
+                        line2.ShortName = pago.Item2.CardCode;
+                        line2.LineMemo= _cchSiguienteEditeText.Value;
+                        //line2.idflujo = _flujoComboBox.Selected.Value.ToInt32();
+                        asiento.JournalEntryLines.Add(line2);
+
+                        var asientoReembolso = _registroComprobanteDomain.generarAsiento(asiento);
+
                         var regCom = new ORCR();
 
-                        regCom.CodDevolucion = pagoRecibido.Item2.DocEntry;
+                        regCom.CodReembolsoCajaChica = asientoReembolso.Item3.TransId;
                         _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
 
                         ITR1 doc = new ITR1();
 
-                        doc.ReconcileAmount = pagoRecibido.Item2.DocTotal;
+                        doc.ReconcileAmount = _saldoEditText.Value;
                         doc.Selected = "Y";
-                        doc.TransId = pagoRecibido.Item2.TransId.ToString();
+                        doc.TransId = asientoReembolso.Item3.TransId.ToString();
                         doc.TransRowId = "1";
 
                         recon.InternalReconciliationOpenTransRows.Add(doc);
                     }
-
-                    if (_montoEditText.Value.ToDecimal() < _totalGastoEditText.Value.ToDecimal())
-                    {
-                        //pago.Item2.DocTotal = (_totalGastoEditText.Value.ToDecimal() - _montoEditText.Value.ToDecimal()).ToString();
-                        pago.Item2.DocTotal = _saldoEditText.Value;
-                        var pagoLocal = pago.Item2;
-                        pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
-                        pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
-                        pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
-                        pagoLocal.Comments = _referenciaEditText.Value;
-
-                        var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pagoLocal);
-
-                        var regCom = new ORCR();
-                        regCom.CodReembolso = pagoEfectuado.Item2.DocEntry;
-                        _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
-
-                        ITR1 doc = new ITR1();
-
-                        doc.ReconcileAmount = pagoEfectuado.Item2.DocTotal;
-                        doc.Selected = "Y";
-                        doc.TransId = pagoEfectuado.Item2.TransId.ToString();
-                        doc.TransRowId = "1";
-
-                        recon.InternalReconciliationOpenTransRows.Add(doc);
-                    }
+           
                     var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
                     if (respuesta.Item1)
                     {
@@ -1543,6 +1675,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
             else
             {
+                validarCamposReferenciados();
                 if (_estadoCombox.Value == "L")
                 {
                     _liquidarButton.Item.Enabled = false;
@@ -1932,8 +2065,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = false;
                     _codSaldoEditText.Item.Visible = false;
                     _linkSaldo.Item.Visible = false;
-                    _flujoComboBox.Item.Visible = false;
-                    _flujoLabel.Item.Visible = false;
+                    _flujoComboBox.Item.Visible = true;
+                    _flujoLabel.Item.Visible = true;
                     _cchSiguienteEditeText.Item.Visible = true;
                     _cchSiguienteLabel.Item.Visible = true;
                 }

@@ -117,6 +117,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 document.ReferenceDate = asientoRecon.ReferenceDate;
                 document.TaxDate = asientoRecon.TaxDate;
                 document.Memo = asientoRecon.Memo;
+                document.Reference2 = asientoRecon.Reference2;
 
                 JournalEntries_Lines documentLines = document.Lines;
                 asientoRecon.JournalEntryLines.ForEach((line, index, lastIteration) =>
@@ -127,10 +128,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     documentLines.Credit = line.Credit;
                     documentLines.Debit = line.Debit;
                     documentLines.LineMemo = line.LineMemo;
+                    documentLines.Reference2 = line.Reference2;
+
+                    if (line.idflujo > 0)
+                    {
+                        documentLines.PrimaryFormItems.CashFlowLineItemID = line.idflujo;
+                        documentLines.PrimaryFormItems.AmountLC = line.Debit > 0 ? line.Debit : line.Credit;
+                    }
+                      
 
 
                     lastIteration.IfFalse(() => documentLines.Add());
                 });
+
 
 
 
