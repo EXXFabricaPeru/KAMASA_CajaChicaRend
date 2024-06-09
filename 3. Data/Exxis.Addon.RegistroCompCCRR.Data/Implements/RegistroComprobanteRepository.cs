@@ -216,7 +216,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 openTrans.ReconDate = reconciliacion.ReconDate;
 
                 int cont = 0;
-                
+
                 foreach (var item in reconciliacion.InternalReconciliationOpenTransRows)
                 {
                     openTrans.InternalReconciliationOpenTransRows.Add();
@@ -277,6 +277,43 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 GeneralData generalData = generalService.GetByParams(generalDataParams);
 
                 generalData.SetProperty("U_EXX_ORCR_STAD", estado);
+
+
+                generalService.Update(generalData);
+                Company.EndTransaction(BoWfTransOpt.wf_Commit);
+                //return Tuple.Create(true, string.Empty);
+            }
+            catch (Exception exception)
+            {
+                if (Company.InTransaction)
+                    Company.EndTransaction(BoWfTransOpt.wf_RollBack);
+
+                //return Tuple.Create(false, exception.Message);
+            }
+        }
+
+        public override void ActualizarObjectRRCC(string codigo, ORCR document)
+        {
+            try
+            {
+                Company.StartTransaction();
+                CompanyService companyService = Company.GetCompanyService();
+                GeneralService generalService = companyService.GetGeneralService(ORCR.ID);
+                var generalDataParams = (GeneralDataParams)generalService.GetDataInterface(GeneralServiceDataInterfaces.gsGeneralDataParams);
+                generalDataParams.SetProperty("Code", codigo);
+                GeneralData generalData = generalService.GetByParams(generalDataParams);
+
+                if (!string.IsNullOrEmpty(document.CodDevolucion))
+                    generalData.SetProperty("U_EXX_ORCR_CDEV", document.CodDevolucion);
+
+                if (!string.IsNullOrEmpty(document.CodReembolsoCajaChica))
+                    generalData.SetProperty("U_EXX_ORCR_CRCC", document.CodReembolsoCajaChica);
+
+                if (!string.IsNullOrEmpty(document.CodReembolso))
+                    generalData.SetProperty("U_EXX_ORCR_CREM", document.CodReembolso);
+
+                if (!string.IsNullOrEmpty(document.CodLiquidacion))
+                    generalData.SetProperty("U_EXX_ORCR_CLIQ", document.CodLiquidacion);
 
 
                 generalService.Update(generalData);
@@ -384,8 +421,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             List<REC1> list = new List<REC1>();
 
             var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
-            var query = "select \"U_EXX_ORCR_STAD\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
-                " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\"   " +
+            var query = "select \"U_EXX_ORCR_STAD\", OV.\"DocTotal\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
+                " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
+                "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
                 " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
                 " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
             recordSet.DoQuery(string.Format(query, tipoRendicion));
@@ -397,7 +435,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 line.NroDocEmpleado = recordSet.GetColumnValue("U_EXX_NRODOE")?.ToString();
                 line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION")?.ToString();
                 line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP")?.ToString();
-                line.Monto = recordSet.GetColumnValue("U_EXX_MONCAJ").ToDouble();
+                line.Monto = recordSet.GetColumnValue("TotalPago").ToDouble();
                 line.FechaInicio = recordSet.GetColumnValue("U_EXX_FINICIO").ToDateTime();
                 line.FechaFin = recordSet.GetColumnValue("U_EXX_FFIN").ToDateTime();
                 list.Add(line);
@@ -470,6 +508,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 documentValid.CardCode = document.CardCode;
                 //documentValid.JournalMemo = document.CardName;
                 documentValid.UserFields.Fields.Item("U_EXX_NUMEREND").Value = document.NroRendicion;
+                documentValid.UserFields.Fields.Item("U_EXX_MPTRABAN").Value = document.MedioPagoTrans;
+
+                documentValid.Remarks = document.Comments;
                 int cont = 0;
 
                 documentValid.TransferSum = document.DocTotal.ToDouble();
@@ -569,23 +610,27 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             try
             {
                 Payments documentValid;
-                documentValid = (SAPbobsCOM.Payments)Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oIncomingPayments);
+                documentValid = (SAPbobsCOM.Payments)Company.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oVendorPayments);
 
                 documentValid.DocDate = document.DocDate;
                 //documentValid.DocDueDate = document.DocDate;
                 documentValid.TaxDate = document.DocDate;
                 documentValid.CardCode = document.CardCode;
                 //documentValid.JournalMemo = document.CardName;
-                documentValid.UserFields.Fields.Item("U_EXX_NUMEREND").Value = document.NroRendicion;
+                //documentValid.UserFields.Fields.Item("U_EXX_NUMEREND").Value = document.NroRendicion;
+                documentValid.UserFields.Fields.Item("U_EXX_MPTRABAN").Value = document.MedioPagoTrans;
+
+                documentValid.Remarks = document.NroRendicion+"-"+document.Comments;
+
                 int cont = 0;
 
                 documentValid.TransferSum = document.DocTotal.ToDouble();
                 documentValid.TransferAccount = document.TrsfrAcct;
                 documentValid.BPLID = document.BPLID;
-                documentValid.IsPayToBank = BoYesNoEnum.tYES;
+                //documentValid.IsPayToBank = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
                 documentValid.DocType = BoRcptTypes.rSupplier;
-
+               
 
                 int res = documentValid.Add();
                 if (res != 0) // Check the result
@@ -634,7 +679,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                     pago.DocTotal = recordSet.GetColumnValue("DocTotal").ToString();
                     pago.TrsfrAcct = recordSet.GetColumnValue("TrsfrAcct").ToString();
                     pago.DocDate = recordSet.GetColumnValue("DocDate").ToDateTime();
-                    pago.NroRendicion = recordSet.GetColumnValue("U_EXX_NUMEREND").ToString();
+                    pago.NroRendicion = recordSet.GetColumnValue("U_EXX_NUMEREND")?.ToString();
                     pago.BPLID = recordSet.GetColumnValue("BPLId").ToInt32();
 
                     return pago;

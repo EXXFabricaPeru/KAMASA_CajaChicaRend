@@ -235,5 +235,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
         {
             return UnitOfWork.InfrastructureRepository.RetrievePaymentGroup();
         }
+
+        public string RetrieveAccountByFormatCode(string code)
+        {
+            return UnitOfWork.InfrastructureRepository.RetrieveAccountCodeByActID(code);
+        }
     }
 }

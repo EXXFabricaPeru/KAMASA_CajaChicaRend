@@ -103,6 +103,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             return UnitOfWork.RegistroComprobanteRepository.RetrieveMedioPago();
         }
 
+        public void ActualizarCamposRRCC(string value, ORCR regCom)
+        {
+            UnitOfWork.RegistroComprobanteRepository.ActualizarObjectRRCC(value, regCom);
+        }
+
 
 
 

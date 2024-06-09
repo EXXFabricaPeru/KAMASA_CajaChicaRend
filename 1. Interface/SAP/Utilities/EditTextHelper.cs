@@ -122,6 +122,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Utilities
             var value = editText.Value;
             return DateTime.ParseExact(value, SAP_DATE_STRING_FORMAT, CultureInfo.InvariantCulture);
         }
+       
+
 
         public static int GetInt32Value(this EditText editText)
         {

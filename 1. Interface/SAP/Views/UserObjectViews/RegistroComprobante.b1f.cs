@@ -242,8 +242,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
             var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
 
-         
-            
+
+
             try
             {
                 _igvED.Value = "IGV";
@@ -260,7 +260,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
         void cflTD()
         {
-         
+
             try
             {
                 ChooseFromListCollection oCFLs = UIAPIRawForm.ChooseFromLists;
@@ -272,7 +272,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 oCFLCreationParams.MultiSelection = false;
                 oCFLCreationParams.ObjectType = "EXX_RCCR_TDOC"; // Object Type for Business Partners
                 oCFLCreationParams.UniqueID = "CFL123";
-                
+
 
                 ChooseFromList oCFL = oCFLs.Add(oCFLCreationParams);
                 oCFL.IsAutoFill = true;
@@ -337,7 +337,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     sucursalesValidValues.Add(flow.Item1, flow.Item2);
 
                 IEnumerable<Tuple<string, string>> medioPagos = _registroComprobanteDomain.RetrieveMedioPago();
-                medioPagoValidValues = _medioPagoComboBox .ValidValues;
+                medioPagoValidValues = _medioPagoComboBox.ValidValues;
 
                 foreach (Tuple<string, string> flow in medioPagos)
                     medioPagoValidValues.Add(flow.Item1, flow.Item2);
@@ -453,7 +453,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             _descripcionEditText.Value = _selectedRendicion.Descripcion;
             _empleadoEditText.Value = _selectedRendicion.NombreEmpleado;
             _montoEditText.Value = _selectedRendicion.Monto.ToString();
-            _saldoEditText.Value = _selectedRendicion.Monto.ToString();
+            _devolucionEditText.Value = _selectedRendicion.Monto.ToString();
         }
 
         private static string ColumnaCodigoProveedor = "C_0_1";
@@ -697,7 +697,25 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         public void ActualizarSaldo()
         {
             ActualizarTotalGasto();
-            _saldoEditText.Value = (_montoEditText.Value.ToDouble() - _totalGastoEditText.Value.ToDouble()).ToString();
+            var resto = _montoEditText.Value.ToDouble() - _totalGastoEditText.Value.ToDouble();
+
+            if (resto > 0)
+            {
+                _devolucionEditText.Value = resto.ToString();
+                _saldoEditText.Value = "0";
+            }
+                
+            else if (resto == 0)
+            {
+                _devolucionEditText.Value = "0";
+                _saldoEditText.Value = "0";
+            }
+            else if (resto < 0)
+            {
+                _devolucionEditText.Value = "0";
+                _saldoEditText.Value = (resto * -1).ToString();
+            }
+             
 
         }
         private void ActualizarTotalGasto()
@@ -1146,6 +1164,16 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 if (string.IsNullOrEmpty(_sucursalComboBox.Value))
                     throw new Exception("Debe seleccionar una sucursal");
 
+                if (_devolucionEditText.Value.ToDouble() > 0 || _saldoEditText.Value.ToDouble() > 0)
+                {
+                    if (string.IsNullOrEmpty(_medioPagoComboBox.Value))
+                        throw new Exception("Debe seleccionar un medio de pago");
+                    if (string.IsNullOrEmpty(_cuentaContableEditText.Value))
+                        throw new Exception("Debe seleccionar una cuenta contable");
+                    if (string.IsNullOrEmpty(_fechaEditText.Value))
+                        throw new Exception("Debe seleccionar una fecha");
+                }
+
                 string DocFalta = "";
                 for (int i = 1; i <= _detailMatrix.RowCount; i++)
                 {
@@ -1247,7 +1275,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
 
 
-                            recon.ReconDate = DateTime.Now;
+                            recon.ReconDate = DateTime.Now.AddDays(2);//cambiar luego
                             recon.CardOrAccount = "C";
                             var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.FolioPref == serie && t.FolioNum == numero && t.CardCode == proveedor).FirstOrDefault();
                             //COMPROBANTE
@@ -1285,8 +1313,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                     if (_montoEditText.Value.ToDecimal() > _totalGastoEditText.Value.ToDecimal())
                     {
-                        pago.Item2.DocTotal = _saldoEditText.Value;
-                        var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pago.Item2);
+                        pago.Item2.DocTotal = _devolucionEditText.Value;
+                        var pagoLocal = pago.Item2;
+
+                        pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
+                        pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                        pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
+                        pagoLocal.Comments = _referenciaEditText.Value;
+
+                        var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pagoLocal);
+                        var regCom = new ORCR();
+
+                        regCom.CodDevolucion = pagoRecibido.Item2.DocEntry;
+                        _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
 
                         ITR1 doc = new ITR1();
 
@@ -1300,8 +1339,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                     if (_montoEditText.Value.ToDecimal() < _totalGastoEditText.Value.ToDecimal())
                     {
-                        pago.Item2.DocTotal = (_totalGastoEditText.Value.ToDecimal() - _montoEditText.Value.ToDecimal()).ToString();
-                        var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pago.Item2);
+                        //pago.Item2.DocTotal = (_totalGastoEditText.Value.ToDecimal() - _montoEditText.Value.ToDecimal()).ToString();
+                        pago.Item2.DocTotal = _saldoEditText.Value;
+                        var pagoLocal = pago.Item2;
+                        pagoLocal.DocDate = _fechaEditText.GetDateTimeValue();
+                        pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                        pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
+                        pagoLocal.Comments = _referenciaEditText.Value;
+
+                        var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pagoLocal);
+
+                        var regCom = new ORCR();
+                        regCom.CodReembolso = pagoEfectuado.Item2.DocEntry;
+                        _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
 
                         ITR1 doc = new ITR1();
 
@@ -1534,7 +1584,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             {
 
             }
-         
+
         }
 
         public static readonly string ANULAR_DOCUMENTO = $"{ID}.anular.doc";
@@ -1713,7 +1763,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     }
                 }
 
-              
+
 
                 _detailMatrix.AddRow();
 
@@ -1860,7 +1910,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _flujoComboBox.Item.Visible = true;
                     _flujoLabel.Item.Visible = true;
                     _cchSiguienteEditeText.Item.Visible = false;
-                    _cchSiguienteLabel.Item.Visible = false;    
+                    _cchSiguienteLabel.Item.Visible = false;
                 }
                 else
                 {

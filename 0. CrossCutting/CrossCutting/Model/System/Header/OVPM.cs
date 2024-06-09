@@ -27,8 +27,10 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
 
         public int BPLID { get; set; }
 
-        [SAPColumn(@"U_EXX_MPTRABAN", false)]
+        //[SAPColumn(@"U_EXX_MPTRABAN", false)]
         public string MedioPagoTrans { get; set; }
+
+        public string Comments { get; set; }
 
     }
 }
