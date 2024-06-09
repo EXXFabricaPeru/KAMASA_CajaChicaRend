@@ -119,6 +119,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
+                _flujoComboBox.Item.Visible = false;
+                _flujoLabel.Item.Visible = false;
                 _infrastructureDomain = FormHelper.GetDomain<InfrastructureDomain>();
                 _registroComprobanteDomain = FormHelper.GetDomain<RegistroComprobanteDomain>();
                 _settingsDomain = FormHelper.GetDomain<SettingsDomain>();
@@ -1272,12 +1274,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             var numeracion = serie + "-" + numero;
                             var proveedor = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(i).Specific).Value;
 
-
+                            var docentry = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDocEntry).Cells.Item(i).Specific).Value.ToInt32();
 
 
                             recon.ReconDate = DateTime.Now.AddDays(2);//cambiar luego
                             recon.CardOrAccount = "C";
-                            var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.FolioPref == serie && t.FolioNum == numero && t.CardCode == proveedor).FirstOrDefault();
+                            var purchaseInvoice = _marketingDocumentDomain.RetrievePurchaseInvoice(t => t.DocumentEntry== docentry).FirstOrDefault();
                             //COMPROBANTE
                             ITR1 doc = new ITR1();
                             //doc.CreditOrDebit = "codDebit";
@@ -1363,6 +1365,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         recon.InternalReconciliationOpenTransRows.Add(doc);
                     }
                     var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
+                    if (respuesta.Item1)
+                    {
+                        var regCom = new ORCR();
+                        regCom.CodLiquidacion = respuesta.Item2;
+                        _registroComprobanteDomain.ActualizarCamposRRCC(_codeEditText.Value, regCom);
+                    }
                 }
                 else
                 {
@@ -1907,8 +1915,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = true;
                     _codSaldoEditText.Item.Visible = true;
                     _linkSaldo.Item.Visible = true;
-                    _flujoComboBox.Item.Visible = true;
-                    _flujoLabel.Item.Visible = true;
+                    _flujoComboBox.Item.Visible = false;
+                    _flujoLabel.Item.Visible = false;
                     _cchSiguienteEditeText.Item.Visible = false;
                     _cchSiguienteLabel.Item.Visible = false;
                 }

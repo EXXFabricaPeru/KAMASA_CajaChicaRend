@@ -245,6 +245,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 {
                     if (Company.InTransaction)
                         Company.EndTransaction(BoWfTransOpt.wf_Commit);
+
+                    return Tuple.Create(true, reconParams.ReconNum.ToString());
                 }
                 else
                 {
@@ -421,11 +423,18 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             List<REC1> list = new List<REC1>();
 
             var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
-            var query = "select \"U_EXX_ORCR_STAD\", OV.\"DocTotal\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
-                " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
-                "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
-                " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
-                " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+            var query = "";
+
+            query = "select \"U_EXX_ORCR_STAD\", OV.\"DocTotal\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
+                            " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
+                            "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
+                            " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
+                            " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+
+
+
+
+
             recordSet.DoQuery(string.Format(query, tipoRendicion));
             IList<Tuple<string, string>> result = new List<Tuple<string, string>>();
             while (!recordSet.EoF)
@@ -620,7 +629,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 //documentValid.UserFields.Fields.Item("U_EXX_NUMEREND").Value = document.NroRendicion;
                 documentValid.UserFields.Fields.Item("U_EXX_MPTRABAN").Value = document.MedioPagoTrans;
 
-                documentValid.Remarks = document.NroRendicion+"-"+document.Comments;
+                documentValid.Remarks = document.NroRendicion + "-" + document.Comments;
 
                 int cont = 0;
 
@@ -630,7 +639,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 //documentValid.IsPayToBank = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
                 documentValid.DocType = BoRcptTypes.rSupplier;
-               
+
 
                 int res = documentValid.Add();
                 if (res != 0) // Check the result
