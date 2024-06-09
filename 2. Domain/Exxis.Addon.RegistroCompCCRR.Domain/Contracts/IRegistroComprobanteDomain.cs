@@ -31,5 +31,6 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
         Tuple<bool, ORCT> GenerarPagoRecibido(OVPM item2);
         Tuple<bool, OVPM> GenerarPagoEfectuado(OVPM item2);
         double GetTipoCambio(DateTime fecha, string currency);
+        IEnumerable<Tuple<string, string>> RetrieveMedioPago();
     }
 }

@@ -677,5 +677,23 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 throw new Exception(ex.Message);
             }
         }
+
+        public override IEnumerable<Tuple<string, string>> RetrieveMedioPago()
+        {
+            {
+                var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
+                recordSet.DoQuery("select  * from \"@EXX_MEDPAG\"");
+                IList<Tuple<string, string>> result = new List<Tuple<string, string>>();
+                while (!recordSet.EoF)
+                {
+                    var code = recordSet.GetColumnValue("Code").ToString();
+                    var description = recordSet.GetColumnValue("Name").ToString();
+                    result.Add(Tuple.Create(code, description));
+                    recordSet.MoveNext();
+                }
+
+                return result;
+            }
+        }
     }
 }

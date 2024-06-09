@@ -76,10 +76,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this.StaticText2 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_8").Specific));
             this.StaticText3 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_9").Specific));
             this.StaticText4 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_10").Specific));
-            this.EditText0 = ((SAPbouiCOM.EditText)(this.GetItem("Item_11").Specific));
-            this.EditText1 = ((SAPbouiCOM.EditText)(this.GetItem("Item_12").Specific));
-            this.ComboBox0 = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_13").Specific));
-            this.EditText2 = ((SAPbouiCOM.EditText)(this.GetItem("Item_14").Specific));
+            this._fechaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_11").Specific));
+            this._referenciaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_12").Specific));
+            this._medioPagoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_13").Specific));
+            this._cuentaContableEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_14").Specific));
             this._devolucionEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_15").Specific));
             this._devolucionLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_16").Specific));
             this._codLiquidacionEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_17").Specific));
@@ -92,6 +92,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._reembolsoCajaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_24").Specific));
             this._codReembolsoCajaEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_25").Specific));
             this._linkReembolso = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_26").Specific));
+            this._cchSiguienteEditeText = ((SAPbouiCOM.EditText)(this.GetItem("Item_27").Specific));
+            this._cchSiguienteLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_28").Specific));
+            this._flujoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_29").Specific));
+            this._flujoLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_30").Specific));
             this.OnCustomInitialize();
 
         }
@@ -152,6 +156,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     setValuesLines();
                     _liquidarButton.Item.Enabled = false;
                     _registrarButton.Item.Enabled = false;
+                }
+                else
+                {
+                    validarCamposReferenciados();
                 }
 
                 // setConditions();
@@ -311,6 +319,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             ValidValues tipoRendicionValidValues = null;
             ValidValues sucursalesValidValues = null;
+            ValidValues medioPagoValidValues = null;
+            ValidValues flujoCajaValidValues = null;
             try
             {
                 IEnumerable<Tuple<string, string>> tipoRendicion = _infrastructureDomain.RetrieveValidValues<RECC, string>(t => t.Tipo);
@@ -325,6 +335,20 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                 foreach (Tuple<string, string> flow in sucursales)
                     sucursalesValidValues.Add(flow.Item1, flow.Item2);
+
+                IEnumerable<Tuple<string, string>> medioPagos = _registroComprobanteDomain.RetrieveMedioPago();
+                medioPagoValidValues = _medioPagoComboBox .ValidValues;
+
+                foreach (Tuple<string, string> flow in medioPagos)
+                    medioPagoValidValues.Add(flow.Item1, flow.Item2);
+
+                IEnumerable<Tuple<string, string>> flujoCaja = _infrastructureDomain.RetrieveTipoFlujos();
+                flujoCajaValidValues = _flujoComboBox.ValidValues;
+
+                foreach (Tuple<string, string> flow in flujoCaja)
+                    flujoCajaValidValues.Add(flow.Item1, flow.Item2);
+
+
             }
             catch (Exception ex)
             {
@@ -1465,10 +1489,20 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 {
                     _liquidarButton.Item.Enabled = false;
                     _registrarButton.Item.Enabled = false;
+
+                    _medioPagoComboBox.Item.Enabled = false;
+                    _flujoComboBox.Item.Enabled = false;
+                    _referenciaEditText.Item.Enabled = false;
+                    _fechaEditText.Item.Enabled = false;
+                    _cuentaContableEditText.Item.Enabled = false;
                 }
                 else
                 {
-                   
+                    _medioPagoComboBox.Item.Enabled = true;
+                    _flujoComboBox.Item.Enabled = true;
+                    _referenciaEditText.Item.Enabled = true;
+                    _fechaEditText.Item.Enabled = true;
+                    _cuentaContableEditText.Item.Enabled = true;
                     habilitarLiquidadods();
 
                 }
@@ -1783,10 +1817,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private StaticText StaticText2;
         private StaticText StaticText3;
         private StaticText StaticText4;
-        private EditText EditText0;
-        private EditText EditText1;
-        private ComboBox ComboBox0;
-        private EditText EditText2;
+        private EditText _fechaEditText;
+        private EditText _referenciaEditText;
+        private ComboBox _medioPagoComboBox;
+        private EditText _cuentaContableEditText;
         private EditText _devolucionEditText;
         private StaticText _devolucionLabel;
         private EditText _codLiquidacionEditText;
@@ -1823,6 +1857,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = true;
                     _codSaldoEditText.Item.Visible = true;
                     _linkSaldo.Item.Visible = true;
+                    _flujoComboBox.Item.Visible = true;
+                    _flujoLabel.Item.Visible = true;
+                    _cchSiguienteEditeText.Item.Visible = false;
+                    _cchSiguienteLabel.Item.Visible = false;    
                 }
                 else
                 {
@@ -1836,6 +1874,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = false;
                     _codSaldoEditText.Item.Visible = false;
                     _linkSaldo.Item.Visible = false;
+                    _flujoComboBox.Item.Visible = false;
+                    _flujoLabel.Item.Visible = false;
+                    _cchSiguienteEditeText.Item.Visible = true;
+                    _cchSiguienteLabel.Item.Visible = true;
                 }
             }
             catch (Exception)
@@ -1843,6 +1885,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             }
         }
+
+        private EditText _cchSiguienteEditeText;
+        private StaticText _cchSiguienteLabel;
+        private ComboBox _flujoComboBox;
+        private StaticText _flujoLabel;
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
         //fechaDoc.Value = lineGrilla.FechaDoc.ToString("yyyyMMdd");
 

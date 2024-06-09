@@ -422,7 +422,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 //var list= TiendasList(Login);
 
                 var recordSet = Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx).To<RecordsetEx>();
-                var query = "Select * from \"OCFW\" where \"CFWId\"<>1 ";
+                var query = "Select * from \"OCFW\" where \"CFWId\"<>1 order by 1 asc ";
                 recordSet.DoQuery(string.Format(query));
 
                 while (!recordSet.EoF)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Code;
+using Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Attributes;
 using VersionDLL.FlagElements.Attributes;
 using VersionDLL.FlagElements.FieldsEnums;
 
@@ -26,6 +27,8 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
 
         public int BPLID { get; set; }
 
-      
+        [SAPColumn(@"U_EXX_MPTRABAN", false)]
+        public string MedioPagoTrans { get; set; }
+
     }
 }

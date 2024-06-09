@@ -89,6 +89,12 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Header
         [FormColumn(20), FieldNoRelated(@"U_EXX_ORCR_CRCC", @"Código Reembolso CC", BoDbTypes.Alpha, Size = 100)]
         public string CodReembolsoCajaChica { get; set; }
 
+        [FormColumn(21), FieldNoRelated(@"U_EXX_ORCR_CCSG", @"CCH Siguiente", BoDbTypes.Alpha, Size = 120)]
+        public string CodCajaChicaSiguiente { get; set; }
+
+        [FormColumn(22), FieldNoRelated(@"U_EXX_ORCR_FLJC", @"Flujo de Caja", BoDbTypes.Alpha, Size = 120)]
+        public string CodFlujodeCaja { get; set; }
+
         [ChildProperty(RCR1.ID)]
         public List<RCR1> DetalleComprobantes { get; set; }
     }

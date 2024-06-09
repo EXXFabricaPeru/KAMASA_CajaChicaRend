@@ -36,6 +36,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract Tuple<bool, ORCT> GenerarPagoRecibido(OVPM doc);
         public abstract Tuple<bool, OVPM> GenerarPagoEfectuado(OVPM doc);
         public abstract double GetTipoCambio(DateTime fecha, string currency);
+        public abstract IEnumerable<Tuple<string, string>> RetrieveMedioPago();
 
 
 

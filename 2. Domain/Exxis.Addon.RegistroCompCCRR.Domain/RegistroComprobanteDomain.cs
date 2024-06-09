@@ -98,6 +98,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             return UnitOfWork.RegistroComprobanteRepository.GetTipoCambio(fecha,currency);
         }
 
+        public IEnumerable<Tuple<string, string>> RetrieveMedioPago()
+        {
+            return UnitOfWork.RegistroComprobanteRepository.RetrieveMedioPago();
+        }
+
 
 
 
