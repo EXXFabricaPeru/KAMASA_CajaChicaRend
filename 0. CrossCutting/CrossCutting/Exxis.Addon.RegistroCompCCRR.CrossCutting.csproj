@@ -80,7 +80,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="VersionDLL">
+    <Reference Include="VersionDLL, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\4. Library\VersionDLL.dll</HintPath>
     </Reference>
     <Reference Include="Z.ExtensionMethods, Version=2.1.1.0, Culture=neutral, PublicKeyToken=59b66d028979105b, processorArchitecture=MSIL">
@@ -236,7 +237,7 @@
     <Compile Include="Model\UDO\Header\OPDS.cs" />
     <Compile Include="Model\UDO\Header\OREN.cs" />
     <Compile Include="Model\UDO\Header\ORTR.cs" />
-    <Compile Include="Model\UDO\Header\OTDC.cs" />
+    <Compile Include="Model\UDO\Header\OIDC.cs" />
     <Compile Include="Model\UDO\Header\OTMI.cs" />
     <Compile Include="Model\UDO\Header\OTMT.cs" />
     <Compile Include="Model\UDO\Header\OTPD.cs" />

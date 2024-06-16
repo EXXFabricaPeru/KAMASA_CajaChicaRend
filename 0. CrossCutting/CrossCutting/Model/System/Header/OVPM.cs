@@ -32,5 +32,7 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header
 
         public string Comments { get; set; }
 
+        public string CodFlujo { get; set; }
+
     }
 }

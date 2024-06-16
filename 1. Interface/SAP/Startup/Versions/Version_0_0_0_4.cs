@@ -20,10 +20,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions
         {
             CreateObject(typeof(ORCR));
 
+
+
         }
         protected override void InitializeFormattedSearch()
-        {     
-            
+        {
+
         }
     }
 }

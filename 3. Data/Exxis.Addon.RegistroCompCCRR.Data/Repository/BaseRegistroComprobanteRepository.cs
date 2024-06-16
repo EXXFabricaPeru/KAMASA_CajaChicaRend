@@ -26,7 +26,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Repository
         public abstract IEnumerable<Tuple<string, string>> RetrieveSucursales();
         public abstract IEnumerable<REC1> RetrieveRendicionesActivas(string tipoRendicion);
         public abstract void ActualizarEstadoLinea(string code, string line, string estado, string docentry);
-        public abstract REC1 RetrieveRendicionByCode(string documentEntry);
+        public abstract REC1 RetrieveRendicionByCode(string documentEntry,string tipo);
         public abstract Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion);
         public abstract Tuple<bool, string, OJDT> GenerarAsiento(OJDT asientoRecon);
         public abstract Tuple<bool, OVPM> RetrievePagoByRendicion(string rendicion);

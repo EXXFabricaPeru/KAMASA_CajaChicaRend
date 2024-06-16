@@ -287,7 +287,8 @@
       <HintPath>..\..\packages\ToString.Fody.1.10.1\lib\net452\ToString.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="VersionDLL">
+    <Reference Include="VersionDLL, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\4. Library\VersionDLL.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
@@ -330,6 +331,7 @@
     <Compile Include="Startup\Versions\Versioner.cs" />
     <Compile Include="Startup\Versions\Version_0_0_0_1.cs" />
     <Compile Include="Startup\Versions\Version_0_0_0_2.cs" />
+    <Compile Include="Startup\Versions\Version_0_0_0_5.cs" />
     <Compile Include="Startup\Versions\Version_0_0_0_4.cs" />
     <Compile Include="Startup\Versions\Version_0_0_0_3.cs" />
     <Compile Include="Utilities\ApplicationInterfaceHelper.cs" />

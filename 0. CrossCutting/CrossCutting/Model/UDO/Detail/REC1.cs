@@ -58,6 +58,6 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail
         [EnhancedColumn(11), FieldNoRelated("U_EXX_MONCAJ", "Monto", BoDbTypes.Amount)]
         public double Monto { get; set; }
 
-
+        public int CodPagoSAP { get; set; }
     }
 }

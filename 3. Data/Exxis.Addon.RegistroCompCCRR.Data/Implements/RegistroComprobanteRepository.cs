@@ -135,7 +135,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                         documentLines.PrimaryFormItems.CashFlowLineItemID = line.idflujo;
                         documentLines.PrimaryFormItems.AmountLC = line.Debit > 0 ? line.Debit : line.Credit;
                     }
-                      
+
 
 
                     lastIteration.IfFalse(() => documentLines.Add());
@@ -405,12 +405,21 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
         }
 
-        public override REC1 RetrieveRendicionByCode(string documentEntry)
+        public override REC1 RetrieveRendicionByCode(string documentEntry, string tipo)
         {
             REC1 line = new REC1();
 
             var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
-            var query = "select * from \"@EXX_REDCAJA1\" where  IFNULL(\"U_EXX_CODIGO\",'')='{0}'";
+            var query = "";
+            if (tipo == "ER")
+            {
+                query = "select R.*,V.\"DocEntry\" from \"@EXX_REDCAJA1\" R INNER JOIN \"OVPM\" V ON R.\"U_EXX_CODIGO\"=V.\"U_EXX_NUMEREND\" where  IFNULL(\"U_EXX_CODIGO\",'')='{0}'";
+            }
+            else
+            {
+                query = "select * from \"@EXX_REDCAJA1\"  where  IFNULL(\"U_EXX_CODIGO\",'')='{0}'";
+            }
+
             recordSet.DoQuery(string.Format(query, documentEntry));
             //IList<Tuple<string, string>> result = new List<Tuple<string, string>>();
             while (!recordSet.EoF)
@@ -421,7 +430,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 line.Descripcion = recordSet.GetColumnValue("U_EXX_DESCRIPCION")?.ToString();
                 line.NombreEmpleado = recordSet.GetColumnValue("U_EXX_NOMEMP")?.ToString();
                 line.Monto = recordSet.GetColumnValue("U_EXX_MONCAJ").ToDouble();
-
+                if (tipo == "ER")
+                    line.CodPagoSAP = recordSet.GetColumnValue("DocEntry").ToInt32();
                 recordSet.MoveNext();
             }
 
@@ -435,11 +445,22 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             var recordSet = (RecordsetEx)Company.GetBusinessObject(BoObjectTypes.BoRecordsetEx);
             var query = "";
 
-            query = "select \"U_EXX_ORCR_STAD\", OV.\"DocTotal\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
-                            " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
-                            "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
-                            " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
-                            " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+            if (tipoRendicion == "ER")
+            {
+                query = "select \"U_EXX_ORCR_STAD\", OV.\"DocTotal\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
+                           " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
+                           "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
+                           " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
+                           " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+            }
+            else
+            {
+                query = "select \"U_EXX_ORCR_STAD\", R1.\"U_EXX_MONCAJ\" as \"TotalPago\", R1.* from \"@EXX_REDCAJA1\" R1 JOIN \"@EXX_REDCAJA\" R ON R.\"Code\"=R1.\"Code\" " +
+                           " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
+
+                           " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
+                           " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+            }
 
 
 
@@ -534,6 +555,15 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 
                 documentValid.TransferSum = document.DocTotal.ToDouble();
                 documentValid.TransferAccount = document.TrsfrAcct;
+                documentValid.TransferReference = document.Comments;
+
+
+                if (!string.IsNullOrEmpty(document.CodFlujo))
+                {
+                    documentValid.PrimaryFormItems.CashFlowLineItemID = int.Parse(document.CodFlujo);
+                    documentValid.PrimaryFormItems.AmountLC = document.DocTotal.ToDouble();
+                }
+
                 documentValid.BPLID = document.BPLID;
                 documentValid.IsPayToBank = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
@@ -645,12 +675,17 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 
                 documentValid.TransferSum = document.DocTotal.ToDouble();
                 documentValid.TransferAccount = document.TrsfrAcct;
+                documentValid.TransferReference = document.Comments;
                 documentValid.BPLID = document.BPLID;
                 //documentValid.IsPayToBank = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
                 documentValid.DocType = BoRcptTypes.rSupplier;
 
-
+                if (!string.IsNullOrEmpty(document.CodFlujo))
+                {
+                    documentValid.PrimaryFormItems.CashFlowLineItemID = int.Parse(document.CodFlujo);
+                    documentValid.PrimaryFormItems.AmountLC = document.DocTotal.ToDouble();
+                }
                 int res = documentValid.Add();
                 if (res != 0) // Check the result
                 {

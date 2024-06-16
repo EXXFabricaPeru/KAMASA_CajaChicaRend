@@ -97,6 +97,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._cchSiguienteLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_28").Specific));
             this._flujoComboBox = ((SAPbouiCOM.ComboBox)(this.GetItem("Item_29").Specific));
             this._flujoLabel = ((SAPbouiCOM.StaticText)(this.GetItem("Item_30").Specific));
+            this.StaticText5 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_31").Specific));
+            this._CodPagoSAPEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_32").Specific));
+            this._linkCodPagoSAP = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_33").Specific));
             this.OnCustomInitialize();
 
         }
@@ -120,8 +123,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-                _flujoComboBox.Item.Visible = false;
-                _flujoLabel.Item.Visible = false;
+                //    _flujoComboBox.Item.Visible = false;
+                //    _flujoLabel.Item.Visible = false;
                 _infrastructureDomain = FormHelper.GetDomain<InfrastructureDomain>();
                 _registroComprobanteDomain = FormHelper.GetDomain<RegistroComprobanteDomain>();
                 _settingsDomain = FormHelper.GetDomain<SettingsDomain>();
@@ -438,13 +441,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     return;
 
                 var documentEntry = _nroRendicionEditText.Value;
-                _selectedRendicion = _registroComprobanteDomain.RetrieveRendicionByCode(documentEntry);
+                _selectedRendicion = _registroComprobanteDomain.RetrieveRendicionByCode(documentEntry,_tipoComboBox.Selected.Value);
                 if (_selectedRendicion != null)
                 {
                     if (_tipoComboBox.Selected.Value == "CC")
                     {
                         string nextCorrelative = GetNextCorrelative(_nroRendicionEditText.Value);
-                        var nextCC = _registroComprobanteDomain.RetrieveRendicionByCode(nextCorrelative);
+                        var nextCC = _registroComprobanteDomain.RetrieveRendicionByCode(nextCorrelative, _tipoComboBox.Selected.Value);
 
                         if (nextCC != null)
                         {
@@ -508,6 +511,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             _empleadoEditText.Value = _selectedRendicion.NombreEmpleado;
             _montoEditText.Value = _selectedRendicion.Monto.ToString();
             _devolucionEditText.Value = _selectedRendicion.Monto.ToString();
+            if (_tipoComboBox.Selected.Value == "ER")
+                _CodPagoSAPEditText.Value = _selectedRendicion.CodPagoSAP.ToString();
         }
 
         private static string ColumnaCodigoProveedor = "C_0_1";
@@ -580,24 +585,18 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 }
                 else if (eventArgs.ColUID == ColumnaTipoDocumento)
                 {
-                    //  conditions = ApplicationInterfaceHelper.ApplicationInstance
-                    //.CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_Conditions)
-                    //.To<SAPbouiCOM.Conditions>();
+                    conditions = ApplicationInterfaceHelper.ApplicationInstance
+                  .CreateObject(SAPbouiCOM.BoCreatableObjectType.cot_Conditions)
+                  .To<SAPbouiCOM.Conditions>();
 
-                    //  condition = conditions.Add();
-                    //  condition.Alias = @"Code";
-                    //  condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                    //  condition.CondVal = "01";
-                    //  condition.Relationship = BoConditionRelationship.cr_OR;
-
-                    //  condition = conditions.Add();
-                    //  condition.Alias = @"Code";
-                    //  condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
-                    //  condition.CondVal = "03";
+                    condition = conditions.Add();
+                    condition.Alias = @"U_EXX_ORCR_VAL";
+                    condition.Operation = SAPbouiCOM.BoConditionOperation.co_EQUAL;
+                    condition.CondVal = "Y";
 
 
-                    //  ChooseFromListConditions = UIAPIRawForm.ChooseFromLists.Item(@"CFL_TD");
-                    //  ChooseFromListConditions.SetConditions(conditions);
+                    ChooseFromListConditions = UIAPIRawForm.ChooseFromLists.Item(@"CFL_TD");
+                    ChooseFromListConditions.SetConditions(conditions);
                 }
                 else if (eventArgs.ColUID == ColumnaDimension1)
                 {
@@ -795,7 +794,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                 }
             }
-        
+
 
 
         }
@@ -1057,6 +1056,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             finally
             {
                 GenericHelper.ReleaseCOMObjects();
+                UIAPIRawForm.Refresh();
             }
 
         }
@@ -1253,6 +1253,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         throw new Exception("Debe seleccionar una cuenta contable");
                     if (string.IsNullOrEmpty(_fechaEditText.Value))
                         throw new Exception("Debe seleccionar una fecha");
+                    if (string.IsNullOrEmpty(_flujoComboBox.Value))
+                        throw new Exception("Debe seleccionar un tipo de flujo de caja");
                 }
 
                 string DocFalta = "";
@@ -1403,6 +1405,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
                             pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
                             pagoLocal.Comments = _referenciaEditText.Value;
+                            pagoLocal.CodFlujo = _flujoComboBox.Selected.Value;
 
                             var pagoRecibido = _registroComprobanteDomain.GenerarPagoRecibido(pagoLocal);
                             var regCom = new ORCR();
@@ -1429,7 +1432,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             pagoLocal.TrsfrAcct = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
                             pagoLocal.MedioPagoTrans = _medioPagoComboBox.Selected.Value;
                             pagoLocal.Comments = _referenciaEditText.Value;
-
+                            pagoLocal.CodFlujo = _flujoComboBox.Selected.Value;
                             var pagoEfectuado = _registroComprobanteDomain.GenerarPagoEfectuado(pagoLocal);
 
                             var regCom = new ORCR();
@@ -1455,15 +1458,15 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         asiento.TransactionCode = "ASM";
                         asiento.DueDate = _fechaEditText.GetDateTimeValue();
                         asiento.ReferenceDate = _fechaEditText.GetDateTimeValue();
-                        asiento.TaxDate= _fechaEditText.GetDateTimeValue();
+                        asiento.TaxDate = _fechaEditText.GetDateTimeValue();
                         asiento.Memo = "Asiento Generado por el Addon de RRCC";
                         asiento.JournalEntryLines = new List<JDT1>();
 
                         var line1 = new JDT1();
                         line1.BPLID = _sucursalComboBox.Selected.Value.ToInt32();
-                        line1.AccountCode= _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
+                        line1.AccountCode = _infrastructureDomain.RetrieveAccountByFormatCode(_cuentaContableEditText.Value);
                         line1.Debit = _saldoEditText.Value.ToDouble();
-                        line1.Reference2= _cchSiguienteEditeText.Value;
+                        line1.Reference2 = _cchSiguienteEditeText.Value;
                         line1.ShortName = line1.AccountCode;
                         line1.LineMemo = _cchSiguienteEditeText.Value;
                         line1.idflujo = _flujoComboBox.Selected.Value.ToInt32();
@@ -1475,7 +1478,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         line2.Credit = _saldoEditText.Value.ToDouble();
                         line2.Reference2 = _cchSiguienteEditeText.Value;
                         line2.ShortName = pago.Item2.CardCode;
-                        line2.LineMemo= _cchSiguienteEditeText.Value;
+                        line2.LineMemo = _cchSiguienteEditeText.Value;
                         //line2.idflujo = _flujoComboBox.Selected.Value.ToInt32();
                         asiento.JournalEntryLines.Add(line2);
 
@@ -1495,7 +1498,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                         recon.InternalReconciliationOpenTransRows.Add(doc);
                     }
-           
+
                     var respuesta = _registroComprobanteDomain.GenerarReconciliacion(recon);
                     if (respuesta.Item1)
                     {
@@ -1724,6 +1727,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             catch (Exception)
             {
 
+            }
+            finally
+            {
+                UIAPIRawForm.Refresh();
             }
 
         }
@@ -2048,8 +2055,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = true;
                     _codSaldoEditText.Item.Visible = true;
                     _linkSaldo.Item.Visible = true;
-                    _flujoComboBox.Item.Visible = false;
-                    _flujoLabel.Item.Visible = false;
+                    //_flujoComboBox.Item.Visible = false;
+                    //_flujoLabel.Item.Visible = false;
                     _cchSiguienteEditeText.Item.Visible = false;
                     _cchSiguienteLabel.Item.Visible = false;
                 }
@@ -2065,8 +2072,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _linkDevolucion.Item.Visible = false;
                     _codSaldoEditText.Item.Visible = false;
                     _linkSaldo.Item.Visible = false;
-                    _flujoComboBox.Item.Visible = true;
-                    _flujoLabel.Item.Visible = true;
+                    //_flujoComboBox.Item.Visible = true;
+                    //_flujoLabel.Item.Visible = true;
                     _cchSiguienteEditeText.Item.Visible = true;
                     _cchSiguienteLabel.Item.Visible = true;
                 }
@@ -2081,6 +2088,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private StaticText _cchSiguienteLabel;
         private ComboBox _flujoComboBox;
         private StaticText _flujoLabel;
+        private StaticText StaticText5;
+        private EditText _CodPagoSAPEditText;
+        private LinkedButton _linkCodPagoSAP;
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
         //fechaDoc.Value = lineGrilla.FechaDoc.ToString("yyyyMMdd");
 

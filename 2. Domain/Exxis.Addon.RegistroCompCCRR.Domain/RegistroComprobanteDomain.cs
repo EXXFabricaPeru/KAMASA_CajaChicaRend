@@ -58,9 +58,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain
             return UnitOfWork.RegistroComprobanteRepository.RetrievePagoByRendicion(rendicion);
         }
 
-        public REC1 RetrieveRendicionByCode(string documentEntry)
+        public REC1 RetrieveRendicionByCode(string documentEntry, string tipo)
         {
-            return UnitOfWork.RegistroComprobanteRepository.RetrieveRendicionByCode(documentEntry);
+            return UnitOfWork.RegistroComprobanteRepository.RetrieveRendicionByCode(documentEntry, tipo);
         }
 
         public IEnumerable<REC1> RetrieveRendicionesActivas(string tipoRendicion)

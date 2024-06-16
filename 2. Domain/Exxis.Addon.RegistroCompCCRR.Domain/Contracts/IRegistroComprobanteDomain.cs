@@ -20,7 +20,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Domain.Contracts
         string RetrieveCodigoGenerado();
         IEnumerable<Tuple<string, string>> RetrieveSucursales();
         IEnumerable<REC1> RetrieveRendicionesActivas(string tipoRendicion);
-        REC1 RetrieveRendicionByCode(string documentEntry);
+        REC1 RetrieveRendicionByCode(string documentEntry, string tipo);
         void ActualizarEstadoLinea(string value, string line, string estado, string docentry);
         Tuple<bool, string> GenerarReconciliacion(OITR reconcilicaion);
         Tuple<bool, string, OJDT> generarAsiento(OJDT asientoRecon);
