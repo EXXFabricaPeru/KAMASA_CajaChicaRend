@@ -18,8 +18,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions
 
         protected override void InitializeTables()
         {
-    
-            //SyncSystemTable(typeof(OIDC));
+
+            SyncSystemTable(typeof(OIDC));
             CreateObject(typeof(ORCR));
 
 

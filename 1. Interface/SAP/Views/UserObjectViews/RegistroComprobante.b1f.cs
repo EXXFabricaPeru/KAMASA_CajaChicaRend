@@ -1287,6 +1287,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             }
             catch (Exception ex)
             {
+                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.StackTrace);
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
             }
             finally
@@ -1315,6 +1316,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     _registroComprobanteDomain.ActualizarEstadoRegistroRendicion(_codeEditText.Value, "L");
                     ApplicationInterfaceHelper.ShowSuccessStatusBarMessage("Liquidación Completa");
                     UIAPIRawForm.Refresh();
+                    UIAPIRawForm.Refresh();
                 }
                 //}
 
@@ -1323,10 +1325,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             catch (Exception ex)
             {
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+
+                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.StackTrace);
             }
             finally
             {
                 GenericHelper.ReleaseCOMObjects();
+                UIAPIRawForm.Refresh();
             }
         }
 
@@ -1547,6 +1552,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             catch (Exception ex)
             {
                 ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.StackTrace);
                 return false;
             }
         }

@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.Data;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Header;
 using Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.System.Detail;
+using Newtonsoft.Json;
 
 namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
 {
@@ -556,16 +557,17 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 documentValid.TransferSum = document.DocTotal.ToDouble();
                 documentValid.TransferAccount = document.TrsfrAcct;
                 documentValid.TransferReference = document.Comments;
-
+                documentValid.TransferDate = document.DocDate;
 
                 if (!string.IsNullOrEmpty(document.CodFlujo))
                 {
                     documentValid.PrimaryFormItems.CashFlowLineItemID = int.Parse(document.CodFlujo);
                     documentValid.PrimaryFormItems.AmountLC = document.DocTotal.ToDouble();
+                    documentValid.PrimaryFormItems.PaymentMeans = PaymentMeansTypeEnum.pmtBankTransfer;
                 }
 
                 documentValid.BPLID = document.BPLID;
-                documentValid.IsPayToBank = BoYesNoEnum.tYES;
+                //documentValid.IsPayToBank = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
                 documentValid.DocType = BoRcptTypes.rSupplier;
                 //foreach (var item in document.DocumentLines)
@@ -655,6 +657,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
         public override Tuple<bool, OVPM> GenerarPagoEfectuado(OVPM document)
         {
             string DocEntry = "", numeracion = "";
+            string valid ="";
             OVPM pago = new OVPM();
             try
             {
@@ -676,8 +679,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 documentValid.TransferSum = document.DocTotal.ToDouble();
                 documentValid.TransferAccount = document.TrsfrAcct;
                 documentValid.TransferReference = document.Comments;
+                documentValid.TransferDate = document.DocDate;
+
                 documentValid.BPLID = document.BPLID;
-                //documentValid.IsPayToBank = BoYesNoEnum.tYES;
+                //documentValid.documentValid.PrimaryFormItems.PaymentMeans = PaymentMeansTypeEnum.pmtBankTransfer; = BoYesNoEnum.tYES;
                 documentValid.ControlAccount = document.BpAct;
                 documentValid.DocType = BoRcptTypes.rSupplier;
 
@@ -685,13 +690,20 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                 {
                     documentValid.PrimaryFormItems.CashFlowLineItemID = int.Parse(document.CodFlujo);
                     documentValid.PrimaryFormItems.AmountLC = document.DocTotal.ToDouble();
+                    documentValid.PrimaryFormItems.PaymentMeans = PaymentMeansTypeEnum.pmtBankTransfer;
                 }
                 int res = documentValid.Add();
+                valid = res.ToString();
+                valid = JsonConvert.SerializeObject(document, new JsonSerializerSettings
+                {
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                });
                 if (res != 0) // Check the result
                 {
                     string error;
                     string vm_GetLastErrorDescription_string = Company.GetLastErrorDescription();
                     //return Tuple.Create(false, vm_GetLastErrorDescription_string);
+                    //valid = valid + "-" + vm_GetLastErrorDescription_string;
                     throw new Exception(vm_GetLastErrorDescription_string);
                     //Company.GetLastError(out res, out error);                 
                 }
@@ -704,7 +716,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(valid);
             }
 
             return Tuple.Create(true, pago);
