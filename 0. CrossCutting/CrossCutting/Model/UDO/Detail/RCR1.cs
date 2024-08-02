@@ -87,5 +87,11 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail
 
         [EnhancedColumn(21), FieldNoRelated("U_EXX_RCR1_CDES", "Descripción", BoDbTypes.Alpha, Size = 254)]
         public string ConceptoDescripcion { get; set; }
+
+        [EnhancedColumn(22), FieldNoRelated("U_EXX_RCR1_IMPM", "Monto Impuesto", BoDbTypes.Amount)]
+        public string MontoImpuesto { get; set; }
+
+        [EnhancedColumn(23), FieldNoRelated("U_EXX_RCR1_IMRF", "Monto Impuesto Ref.", BoDbTypes.Alpha, Size = 20)]
+        public string MontoImpuestoRef { get; set; }
     }
 }

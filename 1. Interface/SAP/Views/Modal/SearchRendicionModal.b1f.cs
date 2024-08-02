@@ -27,12 +27,9 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.Modal
         public const string SAP_FORM_ID = "Exxis.Addon.RegistroCompCCRR.Interface.Views.Modal.SearchRendicionModal";
 
 
-        private class RendicionMatrix
+        private class RendicionMatrix:REC1
         {
-            public string CodigoRendicion { get; set; }
-            public string NroDocEmpleado { get; set; }
-            public string Descripcion { get; set; }
-            public string StartHour { get; set; }
+            public string DocEntryPago { get; set; }
 
             //public DateTime DeliveryDate { get; set; }
 
@@ -84,7 +81,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.Modal
             .AddNonEditableEditTextColumn(@"Monto", t => t.Monto)
             .AddNonEditableEditTextColumn(@"Fecha Inicio", t => t.FechaInicio)
             .AddNonEditableEditTextColumn(@"Fecha Fin", t => t.FechaFin)
-            //.AddNonEditableEditTextColumn(@"Estado de Distribución", t => t.DeliveryStatus)
+            //.AddNonEditableEditTextColumn(@"Pago", t => t.DocEntryPago)
             ;
 
             //UIAPIRawForm.Maximize();
@@ -97,10 +94,15 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.Modal
         {
             IEnumerable<REC1> rendiciones = _registroComprobanteDomain
                 .RetrieveRendicionesActivas(RegistroComprobante.tipoRendicion)
-                //.Select(t => new RendicionMatrix
+                //.Select(t => new REC1
                 //{
                 //    CodigoRendicion = t.CodigoRendicion,
                 //    NroDocEmpleado = t.NroDocEmpleado,
+                //    Descripcion = t.Descripcion,
+                //    Monto=t.Monto,
+                //    FechaInicio = t.FechaInicio,
+                //    FechaFin = t.FechaFin,
+                //    DocEntryPago = t.doc
                 //    //OriginFlowDescription = t.OriginFlowDescription,
                 //    //DeliveryDate = t.DistributionDate ?? DateTime.Now,
                 //    //StartHour = (t.StartHour ?? DateTime.Now).ToString("HH:mm"),
@@ -145,6 +147,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.Modal
             {
                 _selectDocumentEntry.IsNotDefaultThen(i =>
                 {
+                    var list = _rendicionMatrixBuilder.SyncedData.Where(t => t.CodigoRendicion == _selectDocumentEntry).ToList();
+                    if (list.Count > 1)
+                    {
+                        throw new Exception("El código se encuentra en más de un pago");
+                    }
+                    
+
                     REC1 selectedRendicion = _rendicionMatrixBuilder.SyncedData.Single(t => t.CodigoRendicion == _selectDocumentEntry);
                     //OnSelectedRendicion?.Invoke(selectedRoute.DocumentEntry);
                     OnSelectedRendicion?.Invoke(_selectDocumentEntry);

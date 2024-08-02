@@ -69,6 +69,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this._saldoEditText = ((SAPbouiCOM.EditText)(this.GetItem("19_U_E").Specific));
             this._searchRendicionButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._searchRendicionButton_ClickAfter);
             this._crearButton = ((SAPbouiCOM.Button)(this.GetItem("1").Specific));
+            this._crearButton.ClickBefore += new SAPbouiCOM._IButtonEvents_ClickBeforeEventHandler(this._crearButton_ClickBefore);
             this._estadoCombox = ((SAPbouiCOM.ComboBox)(this.GetItem("21_U_Cb").Specific));
             this._addLineButton = ((SAPbouiCOM.Button)(this.GetItem("Item_5").Specific));
             this._addLineButton.ClickAfter += new SAPbouiCOM._IButtonEvents_ClickAfterEventHandler(this._addLineButton_ClickAfter);
@@ -100,10 +101,11 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             this.StaticText5 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_31").Specific));
             this._CodPagoSAPEditText = ((SAPbouiCOM.EditText)(this.GetItem("Item_32").Specific));
             this._linkCodPagoSAP = ((SAPbouiCOM.LinkedButton)(this.GetItem("Item_33").Specific));
+            this.dbsEXD_RCR1 = this.UIAPIRawForm.DataSources.DBDataSources.Item("@EXX_RCCR_RCR1");
             this.OnCustomInitialize();
 
         }
-
+        private SAPbouiCOM.DBDataSource dbsEXD_LINES = null;
         /// <summary>
         /// Initialize form event. Called by framework before form creation.
         /// </summary>
@@ -255,7 +257,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 _igvED.Value = "IGV";
                 _igvPorED.Value = "18.0";
             }
-            catch (Exception)
+            catch (Exception ex)
             {
             }
 
@@ -541,6 +543,8 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private static string ColumnaDescripcionGasto = "Col_0";
 
         private static string ColumnaLineID = "Col_1";
+        private static string ColumnaMontoImpuesto= "Col_2";
+        private static string ColumnaMontoImpuestoReferencial = "Col_3";
 
         RCR1 lineGrilla = new RCR1();
         private Button _crearButton;
@@ -669,6 +673,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 //        _item.Value = _socio.CardName;
                 //    }
                 //}
+               
 
                 if (eventArgs.ColUID == ColumnaFechaContable)
                 {
@@ -905,10 +910,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                     var valor = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(eventArgs.Row).Specific;
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
+                    var montoImpuesto = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuestoReferencial).Cells.Item(eventArgs.Row).Specific;
+                    var impuestoCode = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(eventArgs.Row).Specific;
 
                     var impuesto = (valor.Value.ToDouble() * porcentaje.ToDouble() / 100);
                     total.Value = (valor.Value.ToDouble() + impuesto).ToString("0.00");
-
+                    //impuestoCode.Value = cellvalue;
+                    montoImpuesto.Value = impuesto.ToString("0.00");
                     _detailMatrix.FlushToDataSource();
                     ActualizarSaldo();
                     _detailMatrix.AutoResizeColumns();
@@ -959,9 +967,10 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     var moneda = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(eventArgs.Row).Specific;
                     var fecha = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
                     var tipoCambio = _registroComprobanteDomain.GetTipoCambio(fecha.GetDateTimeValue(), moneda.Value);
-
+                    var montoImpuesto = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuestoReferencial).Cells.Item(eventArgs.Row).Specific;
                     var impuesto = (valor.Value.ToDouble() * tipoCambio * porcentaje.Value.ToDouble() / 100);
 
+                    montoImpuesto.Value = impuesto.ToString("0.00");
                     total.Value = (valor.Value.ToDouble() * tipoCambio + impuesto).ToString("0.00");
 
 
@@ -1013,6 +1022,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                         _after = false;
                         cellvalue = "";
                     }
+                }
+                if (eventArgs.ColUID == ColumnaMontoImpuesto)
+                {
+                    //var select = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuesto).Cells.Item(eventArgs.Row).Specific;
+                    //dbsEXD_RCR1.SetValue("U_EXX_RCR1_IMPM", eventArgs.Row-1, select.Value);
+                    
+                    //_detailMatrix.FlushToDataSource();
                 }
 
                 //}
@@ -1100,7 +1116,14 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
 
                             line.ItemDescription = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDescripcionGasto).Cells.Item(i).Specific).Value;
+
+                            //line.TotalPrice = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(i).Specific).Value.ToDecimal();
+                            //line.TotalPrice = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(i).Specific).Value.ToDecimal();
+
+                            line.MontoImpuesto = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuesto).Cells.Item(i).Specific).Value.ToDecimal();
+
                             line.TotalPrice = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(i).Specific).Value.ToDecimal();
+                            line.TotalConImpuesto = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(i).Specific).Value.ToDecimal();
                             line.TaxCode = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(i).Specific).Value;
                             line.Cuenta = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCuentaGasto).Cells.Item(i).Specific).Value;
                             line.CodServicioCompra = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoGasto).Cells.Item(i).Specific).Value;
@@ -1108,6 +1131,12 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                             line.GrupoDetraccion = "999";
                             line.CentroCosto = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension1).Cells.Item(i).Specific).Value;
                             line.CentroCosto3 = ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaDimension3).Cells.Item(i).Specific).Value;
+
+                            if (line.TotalConImpuesto.ToDecimal() > 0)
+                            {
+                                line.TotalPrice = line.TotalConImpuesto - line.MontoImpuesto;
+                                line.TotalConImpuesto = line.TotalPrice + line.MontoImpuesto;
+                            }
                             lines.Add(line);
 
                             factura.DocumentLines = lines;
@@ -1802,19 +1831,27 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             try
             {
 
-                var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
-                if (estado.Value == "Si")
+                if (rowAnular != -1)
                 {
-                    ApplicationInterfaceHelper.ShowDialogMessageBox("¿Está seguro de anular el comprobante?",
-                     () =>
-                     {
-                         _anularDocumento();
-                     },
-                     null);
+                    var estado = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaEstado).Cells.Item(rowAnular).Specific;
+                    if (estado.Value == "Si")
+                    {
+                        ApplicationInterfaceHelper.ShowDialogMessageBox("¿Está seguro de anular el comprobante?",
+                         () =>
+                         {
+                             _anularDocumento();
+                         },
+                         null);
+                    }
+                    else
+                    {
+                        ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede anular el documento si no está creado");
+                    }
+
                 }
                 else
                 {
-                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("No se puede anular el documento si no está creado");
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage("Debe seleccionar una línea antes de anular");
                 }
 
             }
@@ -1867,30 +1904,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-                //if (!string.IsNullOrEmpty(_ColSelect))
-                //{
-                //    _ColSelect = "";
-
-
-
-                //    var codpre = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCodigoProveedor).Cells.Item(eventArgs.Row).Specific;
-
-                //    codpre.Item.Click();
-
-                //}
-                if (_after)
-                {
-                    _detailMatrix.FlushToDataSource();
-                    var select = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(_ColSelect).Cells.Item(eventArgs.Row).Specific;
-                    UIAPIRawForm.Select();
-                    select.Value = cellvalue;
-                    select.Item.Click();
-                    select.Active = true;
-                    _after = false;
-                    cellvalue = "";
-                    _detailMatrix.FlushToDataSource();
-                }
-
+              
             }
             catch (Exception)
             {
@@ -2097,6 +2111,13 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private StaticText StaticText5;
         private EditText _CodPagoSAPEditText;
         private LinkedButton _linkCodPagoSAP;
+
+        private void _crearButton_ClickBefore(object sboObject, SBOItemEventArg pVal, out bool BubbleEvent)
+        {
+            BubbleEvent = true;
+            //_detailMatrix.FlushToDataSource();
+
+        }
         //var fechaDoc = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaFechaDoc).Cells.Item(eventArgs.Row).Specific;
         //fechaDoc.Value = lineGrilla.FechaDoc.ToString("yyyyMMdd");
 

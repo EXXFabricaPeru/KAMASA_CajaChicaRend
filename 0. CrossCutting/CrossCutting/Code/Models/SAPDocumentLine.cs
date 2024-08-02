@@ -40,8 +40,23 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         public decimal Quantity { get; set; }
         [SAPColumn("PriceBefDi")]
         public decimal UnitPrice { get; set; }
+
         [SAPColumn("LineTotal")]
         public decimal TotalPrice { get; set; }
+
+        [SAPColumn("PriceAfVAT")]
+        public decimal TotalConImpuesto { get; set; }
+
+        [SAPColumn("TotalFrgn")]
+        public decimal TotalPriceFC { get; set; }
+
+
+        [SAPColumn("VatSum")]
+        public decimal MontoImpuesto { get; set; }
+        [SAPColumn("VatSumFrgn")]
+        public decimal MontoImpuestoFC { get; set; }
+
+
         [SAPColumn("Weight1")]
         public decimal TotalSaleWeight { get; set; }
         [SAPColumn("Volume")]

@@ -452,7 +452,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements
                            " LEFT JOIN \"@EXX_RCCR_ORCR\" OC ON OC.\"U_EXX_ORCR_NRCR\"=R1.\"U_EXX_CODIGO\" " +
                            "  JOIN \"OVPM\" OV ON OV.\"U_EXX_NUMEREND\" = R1.\"U_EXX_CODIGO\"    " +
                            " where R1.\"U_EXX_ESTADO\"='N' and IFNULL(R1.\"U_EXX_CODIGO\",'') <>'' and R.\"U_EXX_TIPO\"='{0}'" +
-                           " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  ";
+                           " and IFNULL(\"U_EXX_ORCR_STAD\",'')<>'L' and IFNULL(OC.\"Canceled\",'N')='N'  and IFNULL(OV.\"Canceled\",'N')='N'  ";
             }
             else
             {

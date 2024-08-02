@@ -64,13 +64,30 @@ namespace Exxis.Addon.RegistroCompCCRR.Data.Implements.DocumentRepository
                 entity.DocumentLines.ForEach((line, index, lastIteration) =>
                 {
                     documentLines.ItemDescription = line.ItemDescription;
-                    documentLines.LineTotal = line.TotalPrice.ToDouble();
+                   
+                   
+                    if (line.MontoImpuesto.ToDouble() > 0)
+                    {
+                        documentLines.PriceAfterVAT = line.TotalConImpuesto.ToDouble();
+                        //documentLines.UnitPrice = line.TotalPrice.ToDouble();
+                        documentLines.TaxTotal = line.MontoImpuesto.ToDouble();
+
+                        documentLines.TaxJurisdictions.TaxAmount = line.MontoImpuesto.ToDouble();
+                        documentLines.TaxJurisdictions.JurisdictionCode = line.TaxCode;
+                        documentLines.TaxJurisdictions.JurisdictionType = 1;
+                    }
+                    else
+                    {
+                        documentLines.LineTotal = line.TotalPrice.ToDouble();
+                    }
+
+
                     documentLines.CostingCode = line.CentroCosto;
                     documentLines.CostingCode3 = line.CentroCosto3;
 
                     BaseInfrastructureRepository infraRepository = new UnitOfWork(Company).InfrastructureRepository;
 
-                    string cuenta = infraRepository.RetrieveAccountCodeByActID(line.Cuenta.Replace("-",""));
+                    string cuenta = infraRepository.RetrieveAccountCodeByActID(line.Cuenta.Replace("-", ""));
                     if (string.IsNullOrEmpty(cuenta))
                     {
                         throw new Exception("No se ha configurado o no existe la cuenta del servicio");

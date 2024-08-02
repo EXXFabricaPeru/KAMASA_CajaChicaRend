@@ -67,6 +67,10 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Code.Models
         [SAPColumn("VatSum")]
         public decimal Impuesto { get; set; }
 
+        
+
+       
+
         [SAPColumn("Volume")]
         public decimal TotalVolume { get; set; }
 
