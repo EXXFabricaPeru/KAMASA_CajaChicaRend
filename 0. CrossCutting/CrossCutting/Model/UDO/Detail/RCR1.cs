@@ -76,22 +76,26 @@ namespace Exxis.Addon.RegistroCompCCRR.CrossCutting.Model.UDO.Detail
         [EnhancedColumn(17), FieldNoRelated("U_EXX_RCR1_OIGV", "IGV", BoDbTypes.Amount)]
         public string IGV { get; set; }
 
-        [EnhancedColumn(18), FieldNoRelated("U_EXX_RCR1_TOTA", "TOTAL", BoDbTypes.Alpha, Size = 20)]
+        [EnhancedColumn(18), FieldNoRelated("U_EXX_RCR1_IMRF", "Monto Impuesto Ref.", BoDbTypes.Alpha, Size = 20)]
+        public string MontoImpuestoRef { get; set; }
+
+        [EnhancedColumn(19), FieldNoRelated("U_EXX_RCR1_TOTA", "TOTAL", BoDbTypes.Alpha, Size = 20)]
         public string Total { get; set; }
 
-        [EnhancedColumn(19), FieldNoRelated("U_EXX_RCR1_MIGR", "Migrado", BoDbTypes.Alpha, Size = 20)]
-        public string Migrado { get; set; }
-
-        [EnhancedColumn(20), FieldNoRelated("U_EXX_RCR1_DOCE", "Doc. Entry SAP", BoDbTypes.Alpha, Size = 20)]
-        public string DocEntry { get; set; }
-
-        [EnhancedColumn(21), FieldNoRelated("U_EXX_RCR1_CDES", "Descripción", BoDbTypes.Alpha, Size = 254)]
-        public string ConceptoDescripcion { get; set; }
-
-        [EnhancedColumn(22), FieldNoRelated("U_EXX_RCR1_IMPM", "Monto Impuesto", BoDbTypes.Amount)]
+        [EnhancedColumn(20), FieldNoRelated("U_EXX_RCR1_IMPM", "Monto Impuesto", BoDbTypes.Amount)]
         public string MontoImpuesto { get; set; }
 
-        [EnhancedColumn(23), FieldNoRelated("U_EXX_RCR1_IMRF", "Monto Impuesto Ref.", BoDbTypes.Alpha, Size = 20)]
-        public string MontoImpuestoRef { get; set; }
+
+        [EnhancedColumn(21), FieldNoRelated("U_EXX_RCR1_MIGR", "Migrado", BoDbTypes.Alpha, Size = 20)]
+        public string Migrado { get; set; }
+
+        [EnhancedColumn(22), FieldNoRelated("U_EXX_RCR1_DOCE", "Doc. Entry SAP", BoDbTypes.Alpha, Size = 20)]
+        public string DocEntry { get; set; }
+
+        [EnhancedColumn(23), FieldNoRelated("U_EXX_RCR1_CDES", "Descripción", BoDbTypes.Alpha, Size = 254)]
+        public string ConceptoDescripcion { get; set; }
+
+  
+       
     }
 }
