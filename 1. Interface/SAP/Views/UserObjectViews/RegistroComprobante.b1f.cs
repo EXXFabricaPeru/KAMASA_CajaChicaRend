@@ -14,9 +14,11 @@ using SAPbouiCOM;
 using SAPbouiCOM.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 {
@@ -247,19 +249,19 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             _detailMatrix.Clear();
             _detailMatrix.AddRow();
             ((SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaCondicionPago).Cells.Item(_detailMatrix.RowCount).Specific).Value = "Contado";
-            var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
-            var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
+            //var _igvED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(_detailMatrix.RowCount).Specific;
+            //var _igvPorED = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(_detailMatrix.RowCount).Specific;
 
 
 
-            try
-            {
-                _igvED.Value = "IGV";
-                _igvPorED.Value = "18.0";
-            }
-            catch (Exception ex)
-            {
-            }
+            //try
+            //{
+            //    _igvED.Value = "IGV";
+            //    _igvPorED.Value = "18.0";
+            //}
+            //catch (Exception ex)
+            //{
+            //}
 
             //cflTD();
 
@@ -443,7 +445,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     return;
 
                 var documentEntry = _nroRendicionEditText.Value;
-                _selectedRendicion = _registroComprobanteDomain.RetrieveRendicionByCode(documentEntry,_tipoComboBox.Selected.Value);
+                _selectedRendicion = _registroComprobanteDomain.RetrieveRendicionByCode(documentEntry, _tipoComboBox.Selected.Value);
                 if (_selectedRendicion != null)
                 {
                     if (_tipoComboBox.Selected.Value == "CC")
@@ -543,7 +545,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         private static string ColumnaDescripcionGasto = "Col_0";
 
         private static string ColumnaLineID = "Col_1";
-        private static string ColumnaMontoImpuesto= "Col_2";
+        private static string ColumnaMontoImpuesto = "Col_2";
         private static string ColumnaMontoImpuestoReferencial = "Col_3";
 
         RCR1 lineGrilla = new RCR1();
@@ -673,7 +675,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 //        _item.Value = _socio.CardName;
                 //    }
                 //}
-               
+
 
                 if (eventArgs.ColUID == ColumnaFechaContable)
                 {
@@ -727,6 +729,18 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
 
                 ActualizarSaldo();
+                //Matrix oMatrix = (Matrix)oForm.Items.Item("ID_MATRIX").Specific;
+                //try
+                //{
+
+                //}
+                //catch (Exception)
+                //{
+
+                //    throw;
+                //}
+                //_detailMatrix.Columns.Item("C_0_12").Cells.Item(eventArgs.Row).Click();
+
             }
             catch (Exception ex)
             {
@@ -750,12 +764,14 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             }
 
+
+            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("_detailMatrix_ValidateAfter");
         }
 
         public void ActualizarSaldo()
         {
             ActualizarTotalGasto();
-            var resto = _montoEditText.Value.ToDouble() - _totalGastoEditText.Value.ToDouble();
+            var resto = _montoEditText.Value.ToString().ToDouble() - _totalGastoEditText.Value.ToString().ToDouble();
 
             if (_tipoComboBox.Selected != null)
             {
@@ -907,16 +923,20 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
                     var item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuestoPorcentaje).Cells.Item(eventArgs.Row).Specific;
                     item.Value = porcentaje;
+                    _detailMatrix.FlushToDataSource();
 
                     var valor = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(eventArgs.Row).Specific;
                     var total = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTotal).Cells.Item(eventArgs.Row).Specific;
                     var montoImpuesto = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuestoReferencial).Cells.Item(eventArgs.Row).Specific;
                     var impuestoCode = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaImpuesto).Cells.Item(eventArgs.Row).Specific;
+                    
+                    _detailMatrix.FlushToDataSource();
 
                     var impuesto = (valor.Value.ToDouble() * porcentaje.ToDouble() / 100);
                     total.Value = (valor.Value.ToDouble() + impuesto).ToString("0.00");
-                    //impuestoCode.Value = cellvalue;
+                    
                     montoImpuesto.Value = impuesto.ToString("0.00");
+                    impuestoCode.Value = cellvalue;
                     _detailMatrix.FlushToDataSource();
                     ActualizarSaldo();
                     _detailMatrix.AutoResizeColumns();
@@ -935,22 +955,171 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     ////_detailMatrix.SetCellFocus(eventArgs.Row, 2);
                     //select.Item.Click();
                     //select.Active = true;
+                    //_detailMatrix.Columns.Item(_ColSelect).Cells.Item(eventArgs.Row).Click();
                     _after = true;
                 }
 
+                if (_after)
+                {
+                    if (eventArgs.ColUID == ColumnaTipoDocumento)
+                    {
+                        //UIAPIRawForm.Select();
+                        ////_detailMatrix.Item.Click();
+                        //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                        ////_detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(eventArgs.Row).Click();
+                        SAPbouiCOM.DataTable selectedObjects = eventArgs.To<SAPbouiCOM.ISBOChooseFromListEventArg>().SelectedObjects;
+                        if (selectedObjects == null)
+                            return;
+                        //object value = selectedObjects.GetValue("CardCode", 0);
+                        //string porcentaje = selectedObjects.GetValue("Rate", 0).ToString();
+
+                        cellvalue = selectedObjects.GetValue("Code", 0).ToString();
+                        var item = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(eventArgs.Row).Specific;
+                        item.Value = cellvalue;
+                        _detailMatrix.FlushToDataSource();
+                        _detailMatrix.LoadFromDataSource();
+                        pendingRow = eventArgs.Row;
+                        //focusTimer = new System.Windows.Forms.Timer();
+                        //focusTimer.Interval = 100; // pequeño delay, suficiente para liberar el hilo del evento actual
+                        //focusTimer.Tick += FocusTimer_Tick;
+                        //focusTimer.Start();
+
+
+                        //UIAPIRawForm.Select();
+                        //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                        //_detailMatrix.FlushToDataSource();
+                        //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                        System.Threading.Tasks.Task.Delay(50).ContinueWith(_ =>
+                        {
+                            try
+                            {
+                                UIAPIRawForm.Select();
+                                _detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(pendingRow).Click(
+                                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+                                //UIAPIRawForm.Select();
+                                //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                            }
+                            catch { }
+                        });
+                    }
+
+
+                    if (eventArgs.ColUID == ColumnaCodigoGasto)
+                    {
+                        System.Threading.Tasks.Task.Delay(50).ContinueWith(_ =>
+                        {
+                            try
+                            {
+                                UIAPIRawForm.Select();
+                                _detailMatrix.Columns.Item(ColumnaDimension1).Cells.Item(pendingRow).Click(
+                                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+                                //UIAPIRawForm.Select();
+                                //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                            }
+                            catch { }
+                        });
+                    }
+
+                    if (eventArgs.ColUID == ColumnaDimension1)
+                    {
+                        System.Threading.Tasks.Task.Delay(50).ContinueWith(_ =>
+                        {
+                            try
+                            {
+                                UIAPIRawForm.Select();
+                                _detailMatrix.Columns.Item(ColumnaDimension3).Cells.Item(pendingRow).Click(
+                                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+                                //UIAPIRawForm.Select();
+                                //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                            }
+                            catch { }
+                        });
+                    }
+
+                    if (eventArgs.ColUID == ColumnaDimension3)
+                    {
+                        System.Threading.Tasks.Task.Delay(50).ContinueWith(_ =>
+                        {
+                            try
+                            {
+                                UIAPIRawForm.Select();
+                                _detailMatrix.Columns.Item(ColumnaMoneda).Cells.Item(pendingRow).Click(
+                                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+                                //UIAPIRawForm.Select();
+                                //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                            }
+                            catch { }
+                        });
+                    }
+
+
+
+                    if (eventArgs.ColUID == ColumnaMoneda)
+                    {
+                        System.Threading.Tasks.Task.Delay(50).ContinueWith(_ =>
+                        {
+                            try
+                            {
+                                UIAPIRawForm.Select();
+                                _detailMatrix.Columns.Item(ColumnaValorUnitario).Cells.Item(pendingRow).Click(
+                                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+                                //UIAPIRawForm.Select();
+                                //_detailMatrix.SetCellFocus(eventArgs.Row, 8);
+                                //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                            }
+                            catch { }
+                        });
+                    }
+
+
+                }
+                
+                 
+                
 
             }
             catch (Exception ex)
             {
-                ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
+                if (!ex.Message.Contains("Invalid column"))
+                    ApplicationInterfaceHelper.ShowErrorStatusBarMessage(ex.Message);
             }
             finally
             {
                 GenericHelper.ReleaseCOMObjects();
             }
 
+
+            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("_detailMatrix_ChooseFromListAfter");
         }
         bool _after = false;
+        private System.Windows.Forms.Timer focusTimer;
+        private int pendingRow;
+        private void FocusTimer_Tick(object sender, EventArgs eventArgs)
+        {
+            focusTimer.Stop();
+            focusTimer.Dispose();
+
+            try
+            {
+
+                _detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(pendingRow).Click(
+                   SAPbouiCOM.BoCellClickType.ct_Regular, 0);
+            }
+            catch (Exception ex)
+            {
+                // log si quieres depurar
+            }
+        }
 
         private void _detailMatrix_KeyDownAfter(object sboObject, SBOItemEventArg eventArgs)
         {
@@ -1027,9 +1196,25 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                 {
                     //var select = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaMontoImpuesto).Cells.Item(eventArgs.Row).Specific;
                     //dbsEXD_RCR1.SetValue("U_EXX_RCR1_IMPM", eventArgs.Row-1, select.Value);
-                    
+
                     //_detailMatrix.FlushToDataSource();
                 }
+                if (eventArgs.ColUID == ColumnaTipoDocumento)
+                {
+                    //if (eventArgs.CharPressed == 9)
+                    //{
+                    //    var select = (SAPbouiCOM.EditText)_detailMatrix.Columns.Item(ColumnaSerie).Cells.Item(eventArgs.Row).Specific;
+                    //    UIAPIRawForm.Select();
+                    //    select.Item.Click();
+                    //    select.Active = true;
+                    //    _after = false;
+                    //    cellvalue = "";
+                    //}
+                    
+                }
+
+
+
 
                 //}
             }
@@ -1041,6 +1226,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
             {
                 GenericHelper.ReleaseCOMObjects();
             }
+            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("_detailMatrix_KeyDownAfter");
 
         }
 
@@ -1904,12 +2090,95 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
         {
             try
             {
-              
+                //if (eventArgs.ColUID == ColumnaTipoDocumento)
+                //{
+                //    _detailMatrix.Columns.Item(eventArgs.ColUID).Cells.Item(eventArgs.Row).Click();
+                //}
+
+
+                //if (_after)
+                //{
+                //    _after = false;
+                //    if (eventArgs.ColUID == ColumnaTipoDocumento)
+                //    {
+                //        UIAPIRawForm.Select();
+                //        _detailMatrix.Columns.Item(ColumnaTipoDocumento).Cells.Item(eventArgs.Row).Click();
+
+                //    }
+
+                //}
+
+                //if (_after && eventArgs.ColUID == ColumnaTipoDocumento)
+                //{
+                //    _after = false;
+                //    //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(_after.ToString());
+                //    System.Threading.Tasks.Task.Delay(10).ContinueWith(_ =>
+                //    {
+                //        try
+                //        {
+                //            UIAPIRawForm.Select();
+                //            _detailMatrix.SetCellFocus(eventArgs.Row, 9);
+                //            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+                            
+                //        }
+                //        catch { }
+                //    });
+                //}
+
+                //if (_after && eventArgs.ColUID == ColumnaCodigoGasto)
+                //{
+                //    _after = false;
+                //    //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(_after.ToString());
+                //    System.Threading.Tasks.Task.Delay(10).ContinueWith(_ =>
+                //    {
+                //        try
+                //        {
+                //            UIAPIRawForm.Select();
+                //            _detailMatrix.SetCellFocus(eventArgs.Row, 12);
+                //            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                //        }
+                //        catch { }
+                //    });
+                //}
+                //if (_after && eventArgs.ColUID == ColumnaDimension1)
+                //{
+                //    _after = false;
+                //    //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(_after.ToString());
+                //    System.Threading.Tasks.Task.Delay(10).ContinueWith(_ =>
+                //    {
+                //        try
+                //        {
+                //            UIAPIRawForm.Select();
+                //            _detailMatrix.SetCellFocus(eventArgs.Row, 13);
+                //            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                //        }
+                //        catch { }
+                //    });
+                //}
+
+                //if (_after && eventArgs.ColUID == ColumnaDimension3)
+                //{
+                //    _after = false;
+                //    //ApplicationInterfaceHelper.ShowErrorStatusBarMessage(_after.ToString());
+                //    System.Threading.Tasks.Task.Delay(10).ContinueWith(_ =>
+                //    {
+                //        try
+                //        {
+                //            UIAPIRawForm.Select();
+                //            _detailMatrix.SetCellFocus(eventArgs.Row, 14);
+                //            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("ContinueWith");
+
+                //        }
+                //        catch { }
+                //    });
+                //}
             }
             catch (Exception)
             {
             }
-
+            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("_detailMatrix_LostFocusAfter");
         }
 
         private Button _addLineButton;
@@ -2009,6 +2278,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
                     //_detailMatrix.FlushToDataSource();
                     //_detailMatrix.LoadFromDataSource();
                 }
+
             }
             catch (Exception)
             {
@@ -2016,6 +2286,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Views.UserObjectViews
 
             }
 
+            //ApplicationInterfaceHelper.ShowErrorStatusBarMessage("_detailMatrix_ClickAfter");
         }
 
         private void _sucursalComboBox_ComboSelectAfter(object sboObject, SBOItemEventArg pVal)

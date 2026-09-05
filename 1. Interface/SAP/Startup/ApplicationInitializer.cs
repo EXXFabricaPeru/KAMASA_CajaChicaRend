@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using SAPbouiCOM;
-using Exxis.Addon.RegistroCompCCRR.CrossCutting.Utilities;
+﻿using Exxis.Addon.RegistroCompCCRR.CrossCutting.Utilities;
 using Exxis.Addon.RegistroCompCCRR.Interface.Resources.Menu;
 using Exxis.Addon.RegistroCompCCRR.Interface.Startup.Versions;
 using Exxis.Addon.RegistroCompCCRR.Interface.Utilities;
-using VersionDLL;
+using SAPbouiCOM;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using VersionDLL;
+using System.Threading;
+using System.Reflection;
 
 
 namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
@@ -64,7 +67,7 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
 
             set_events();
 
-
+            SetSapCulture();
             //}
             //else
             //{
@@ -75,6 +78,38 @@ namespace Exxis.Addon.RegistroCompCCRR.Interface.Startup
 
 
             return _sapApplication;
+        }
+
+        public void SetSapCulture()
+        {
+            // Valores de configuración de SAP B1
+            string decSeparator = _company.GetCompanyService().GetAdminInfo().DecimalSeparator;
+            string thsSeparator = _company.GetCompanyService().GetAdminInfo().ThousandsSeparator;
+
+            // Obtener configuración regional de hilo actual
+            CultureInfo currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+
+            // Instanciar nueva configuración regional tomando como base la configuración actual
+            // Nota: Es necesario hacer un Clone() o crear un CultureInfo mutable, 
+            // ya que IetfLanguageTag / Name devuelve una cultura que permite modificar NumberFormat.
+            CultureInfo newCulture = (CultureInfo)currentCulture.Clone();
+
+            // Asignando separador decimal y de grupo
+            newCulture.NumberFormat.NumberDecimalSeparator = decSeparator;
+            newCulture.NumberFormat.CurrencyDecimalSeparator = decSeparator;
+            newCulture.NumberFormat.PercentDecimalSeparator = decSeparator;
+
+            newCulture.NumberFormat.NumberGroupSeparator = thsSeparator;
+            newCulture.NumberFormat.CurrencyGroupSeparator = thsSeparator;
+            newCulture.NumberFormat.PercentGroupSeparator = thsSeparator;
+
+            // Asignar nueva configuración regional al hilo actual
+            System.Threading.Thread.CurrentThread.CurrentCulture = newCulture;
+
+            // Asignar nueva configuración regional como por defecto (disponible en .NET Framework 4.5+ / .NET Core)
+            CultureInfo.DefaultThreadCurrentCulture = newCulture;
+
+            //logger.Info($"SeparadorDecimal = {decSeparator} y SeparadorGrupo = {thsSeparator} leído desde SAP B1");
         }
 
         #region build menus
